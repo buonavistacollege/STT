@@ -2061,14 +2061,11 @@
 function generateCalendar() {
     const grid = document.getElementById('calendarGrid');
     grid.innerHTML = '';
-    grid.style.gap = '4px';
     
-    // Compact day headers - first letter only
-    const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     days.forEach(day => {
         const div = document.createElement('div');
         div.className = 'calendar-day-header';
-        div.style.cssText = 'text-align: center; color: var(--primary); font-weight: 600; padding: 3px; font-size: 0.7rem;';
         div.textContent = day;
         grid.appendChild(div);
     });
@@ -2078,64 +2075,34 @@ function generateCalendar() {
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                      'July', 'August', 'September', 'October', 'November', 'December'];
     document.getElementById('currentMonth').textContent = `${monthNames[month]} ${year}`;
     
-    // Empty cells for padding
     for (let i = 0; i < firstDay; i++) {
         const div = document.createElement('div');
-        div.style.cssText = 'aspect-ratio: 1; min-height: 30px;';
+        div.className = 'calendar-day';
         grid.appendChild(div);
     }
     
-    // Day cells
     for (let i = 1; i <= daysInMonth; i++) {
         const div = document.createElement('div');
         div.className = 'calendar-day';
-        div.style.cssText = 'aspect-ratio: 1; background: rgba(0,0,0,0.2); border: 1px solid rgba(0,212,255,0.1); border-radius: 5px; padding: 2px; cursor: pointer; transition: all 0.3s; min-height: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.75rem;';
         
         const dateStr = new Date(year, month, i).toDateString();
         const hasData = currentUserData.studyLog[dateStr];
         
-        if (hasData) {
-            div.style.background = 'rgba(0, 212, 255, 0.15)';
-            div.classList.add('has-data');
-        }
+        if (hasData) div.classList.add('has-data');
         if (i === selectedDate.getDate() && month === selectedDate.getMonth() && 
             year === selectedDate.getFullYear()) {
-            div.style.borderColor = 'var(--primary)';
-            div.style.boxShadow = '0 0 8px rgba(0, 212, 255, 0.3)';
             div.classList.add('active');
         }
         
-        // Today highlight
-        const today = new Date();
-        if (i === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
-            div.style.color = 'var(--accent)';
-            div.style.fontWeight = '700';
-        }
-        
-        let html = `<span style="font-weight: 600; font-size: 0.8rem;">${i}</span>`;
+        let html = `<div class="day-number">${i}</div>`;
         if (hasData) {
-            html += `<span style="font-size: 0.55rem; color: var(--primary); margin-top: 1px;">●</span>`;
+            html += `<div class="day-info">${hasData.minutes}m</div>`;
         }
         div.innerHTML = html;
-        
-        div.onmouseover = function() {
-            this.style.borderColor = 'var(--primary)';
-            this.style.transform = 'scale(1.15)';
-            this.style.zIndex = '100';
-        };
-        div.onmouseout = function() {
-            if (!this.classList.contains('active')) {
-                this.style.borderColor = 'rgba(0, 212, 255, 0.1)';
-            } else {
-                this.style.borderColor = 'var(--primary)';
-            }
-            this.style.transform = 'scale(1)';
-            this.style.zIndex = '1';
-        };
         
         div.onclick = () => showDayDetails(new Date(year, month, i));
         grid.appendChild(div);
