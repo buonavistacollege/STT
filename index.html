@@ -651,92 +651,103 @@
             background: rgba(255, 68, 68, 0.4);
         }
         
-        /* Calendar */
-        .calendar-container {
-            background: linear-gradient(145deg, var(--bg-card) 0%, var(--bg-hover) 100%);
-            border-radius: 20px;
-            padding: 30px;
-            border: 1px solid rgba(0, 212, 255, 0.2);
-        }
-        
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-        }
-        
-        .calendar-nav {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--primary);
-            color: var(--primary);
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-family: 'Orbitron', sans-serif;
-            transition: all 0.3s;
-        }
-        
-        .calendar-nav:hover {
-            background: var(--primary);
-            color: var(--bg-dark);
-        }
-        
-        .calendar-month {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.3rem;
-            color: var(--primary);
-        }
-        
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 10px;
-        }
-        
-        .calendar-day-header {
-            text-align: center;
-            color: var(--primary);
-            font-weight: 600;
-            padding: 10px;
-            font-size: 0.9rem;
-        }
-        
-        .calendar-day {
-            aspect-ratio: 1;
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(0, 212, 255, 0.1);
-            border-radius: 10px;
-            padding: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            position: relative;
-        }
-        
-        .calendar-day:hover {
-            border-color: var(--primary);
-            transform: scale(1.05);
-        }
-        
-        .calendar-day.active {
-            border-color: var(--primary);
-            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
-        }
-        
-        .calendar-day.has-data {
-            background: rgba(0, 212, 255, 0.15);
-        }
-        
-        .day-number {
-            font-weight: 600;
-            font-size: 1rem;
-        }
-        
-        .day-info {
-            font-size: 0.75rem;
-            color: var(--primary);
-            margin-top: 5px;
-        }
+/* Calendar - Compact Version */
+.calendar-container {
+    background: linear-gradient(145deg, var(--bg-card) 0%, var(--bg-hover) 100%);
+    border-radius: 15px;
+    padding: 20px;
+    border: 1px solid rgba(0, 212, 255, 0.2);
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.calendar-nav {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    padding: 8px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+}
+
+.calendar-nav:hover {
+    background: var(--primary);
+    color: var(--bg-dark);
+}
+
+.calendar-month {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1rem;
+    color: var(--primary);
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+}
+
+.calendar-day-header {
+    text-align: center;
+    color: var(--primary);
+    font-weight: 600;
+    padding: 5px;
+    font-size: 0.75rem;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(0, 212, 255, 0.1);
+    border-radius: 6px;
+    padding: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    min-height: 35px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.calendar-day:hover {
+    border-color: var(--primary);
+    transform: scale(1.1);
+    z-index: 10;
+}
+
+.calendar-day.active {
+    border-color: var(--primary);
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+}
+
+.calendar-day.has-data {
+    background: rgba(0, 212, 255, 0.15);
+}
+
+.day-number {
+    font-weight: 600;
+    font-size: 0.85rem;
+    line-height: 1;
+}
+
+.day-info {
+    font-size: 0.6rem;
+    color: var(--primary);
+    margin-top: 2px;
+    line-height: 1;
+}
         
         /* Marks Section */
         .marks-container {
@@ -1256,23 +1267,41 @@
             </div>
         </div>
 
-        <!-- CALENDAR -->
-        <div id="calendarScreen" class="feature-section">
-            <div class="section-header">
-                <h2 class="section-title">📅 STUDY CALENDAR</h2>
-                <button class="back-btn" onclick="goHome()">← Back to Home</button>
+       <!-- CALENDAR -->
+<div id="calendarScreen" class="feature-section">
+    <div class="section-header">
+        <h2 class="section-title">📅 STUDY CALENDAR</h2>
+        <button class="back-btn" onclick="goHome()">← Back to Home</button>
+    </div>
+    
+    <div class="calendar-compact">
+        <div class="compact-card">
+            <div class="calendar-header" style="margin-bottom: 15px;">
+                <button class="calendar-nav" onclick="changeMonth(-1)" style="padding: 6px 12px; font-size: 0.8rem;">◀</button>
+                <div class="calendar-month" id="calendarMonth" style="font-size: 1rem;">Month</div>
+                <button class="calendar-nav" onclick="changeMonth(1)" style="padding: 6px 12px; font-size: 0.8rem;">▶</button>
             </div>
             
-            <div class="calendar-container">
-                <div class="calendar-header">
-                    <button class="calendar-nav" onclick="changeMonth(-1)">◀</button>
-                    <div class="calendar-month" id="calendarMonth">Month Year</div>
-                    <button class="calendar-nav" onclick="changeMonth(1)">▶</button>
-                </div>
-                
-                <div class="calendar-grid" id="calendarGrid"></div>
+            <div class="calendar-grid-compact" id="calendarGrid"></div>
+        </div>
+        
+        <!-- Mini Stats -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px;">
+            <div class="stat-card" style="padding: 15px;">
+                <div class="stat-value" id="calTotalDays" style="font-size: 1.5rem;">0</div>
+                <div class="stat-label" style="font-size: 0.75rem;">Study Days</div>
+            </div>
+            <div class="stat-card" style="padding: 15px;">
+                <div class="stat-value" id="calTotalMinutes" style="font-size: 1.5rem;">0</div>
+                <div class="stat-label" style="font-size: 0.75rem;">This Month</div>
+            </div>
+            <div class="stat-card" style="padding: 15px;">
+                <div class="stat-value" id="calAvgTime" style="font-size: 1.5rem;">0</div>
+                <div class="stat-label" style="font-size: 0.75rem;">Avg/Day</div>
             </div>
         </div>
+    </div>
+</div>
 
         <!-- MARKS -->
         <div id="marksScreen" class="feature-section">
@@ -2047,57 +2076,89 @@
         }
 
         // ==================== CALENDAR ====================
-        function generateCalendar() {
-            const grid = document.getElementById('calendarGrid');
-            grid.innerHTML = '';
-            
-            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-            days.forEach(day => {
-                const div = document.createElement('div');
-                div.className = 'calendar-day-header';
-                div.textContent = day;
-                grid.appendChild(div);
-            });
-            
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-            const firstDay = new Date(year, month, 1).getDay();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            
-            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                              'July', 'August', 'September', 'October', 'November', 'December'];
-            document.getElementById('calendarMonth').textContent = `${monthNames[month]} ${year}`;
-            
-            for (let i = 0; i < firstDay; i++) {
-                const div = document.createElement('div');
-                div.className = 'calendar-day';
-                grid.appendChild(div);
-            }
-            
-            for (let i = 1; i <= daysInMonth; i++) {
-                const div = document.createElement('div');
-                div.className = 'calendar-day';
-                
-                const dateStr = new Date(year, month, i).toDateString();
-                const hasData = currentUserData.studyLog[dateStr];
-                
-                if (hasData) div.classList.add('has-data');
-                if (i === selectedDate.getDate() && month === selectedDate.getMonth() && 
-                    year === selectedDate.getFullYear()) {
-                    div.classList.add('active');
-                }
-                
-                let html = `<div class="day-number">${i}</div>`;
-                if (hasData) {
-                    html += `<div class="day-info">${hasData.minutes}m</div>`;
-                }
-                div.innerHTML = html;
-                
-                div.onclick = () => showDayDetails(new Date(year, month, i));
-                grid.appendChild(div);
-            }
+function generateCalendar() {
+    const grid = document.getElementById('calendarGrid');
+    grid.innerHTML = '';
+    grid.style.gap = '4px';
+    
+    // Compact day headers - first letter only
+    const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+    days.forEach(day => {
+        const div = document.createElement('div');
+        div.className = 'calendar-day-header';
+        div.style.cssText = 'text-align: center; color: var(--primary); font-weight: 600; padding: 3px; font-size: 0.7rem;';
+        div.textContent = day;
+        grid.appendChild(div);
+    });
+    
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    document.getElementById('currentMonth').textContent = `${monthNames[month]} ${year}`;
+    
+    // Empty cells for padding
+    for (let i = 0; i < firstDay; i++) {
+        const div = document.createElement('div');
+        div.style.cssText = 'aspect-ratio: 1; min-height: 30px;';
+        grid.appendChild(div);
+    }
+    
+    // Day cells
+    for (let i = 1; i <= daysInMonth; i++) {
+        const div = document.createElement('div');
+        div.className = 'calendar-day';
+        div.style.cssText = 'aspect-ratio: 1; background: rgba(0,0,0,0.2); border: 1px solid rgba(0,212,255,0.1); border-radius: 5px; padding: 2px; cursor: pointer; transition: all 0.3s; min-height: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.75rem;';
+        
+        const dateStr = new Date(year, month, i).toDateString();
+        const hasData = currentUserData.studyLog[dateStr];
+        
+        if (hasData) {
+            div.style.background = 'rgba(0, 212, 255, 0.15)';
+            div.classList.add('has-data');
         }
-
+        if (i === selectedDate.getDate() && month === selectedDate.getMonth() && 
+            year === selectedDate.getFullYear()) {
+            div.style.borderColor = 'var(--primary)';
+            div.style.boxShadow = '0 0 8px rgba(0, 212, 255, 0.3)';
+            div.classList.add('active');
+        }
+        
+        // Today highlight
+        const today = new Date();
+        if (i === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+            div.style.color = 'var(--accent)';
+            div.style.fontWeight = '700';
+        }
+        
+        let html = `<span style="font-weight: 600; font-size: 0.8rem;">${i}</span>`;
+        if (hasData) {
+            html += `<span style="font-size: 0.55rem; color: var(--primary); margin-top: 1px;">●</span>`;
+        }
+        div.innerHTML = html;
+        
+        div.onmouseover = function() {
+            this.style.borderColor = 'var(--primary)';
+            this.style.transform = 'scale(1.15)';
+            this.style.zIndex = '100';
+        };
+        div.onmouseout = function() {
+            if (!this.classList.contains('active')) {
+                this.style.borderColor = 'rgba(0, 212, 255, 0.1)';
+            } else {
+                this.style.borderColor = 'var(--primary)';
+            }
+            this.style.transform = 'scale(1)';
+            this.style.zIndex = '1';
+        };
+        
+        div.onclick = () => showDayDetails(new Date(year, month, i));
+        grid.appendChild(div);
+    }
+}
         function changeMonth(delta) {
             currentDate.setMonth(currentDate.getMonth() + delta);
             generateCalendar();
