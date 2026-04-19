@@ -3,1114 +3,422 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Study Tracker Pro - Ultimate Edition</title>
+    <title>Study Tracker Pro - Firebase Edition</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.0/firebase-firestore-compat.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;700&display=swap');
         
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         :root {
-            --primary: #00d4ff;
-            --secondary: #ff00ff;
-            --accent: #00ff88;
-            --bg-dark: #0c0c1d;
-            --bg-card: #16162a;
-            --bg-hover: #1f1f3a;
-            --text: #ffffff;
-            --text-muted: #888888;
-            --danger: #ff4444;
-            --warning: #ffaa00;
+            --primary: #00d4ff; --secondary: #ff00ff; --accent: #00ff88;
+            --bg-dark: #0c0c1d; --bg-card: #16162a; --bg-hover: #1f1f3a;
+            --text: #ffffff; --text-muted: #888888;
+            --danger: #ff4444; --warning: #ffaa00; --success: #00ff88;
         }
         
         body {
             font-family: 'Rajdhani', sans-serif;
             background: linear-gradient(135deg, var(--bg-dark) 0%, #1a1a2e 50%, var(--bg-dark) 100%);
-            min-height: 100vh;
-            color: var(--text);
-            overflow-x: hidden;
+            min-height: 100vh; color: var(--text); overflow-x: hidden;
         }
         
         .bg-animation {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
             background: 
-                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 40% 20%, rgba(120, 119, 198, 0.2) 0%, transparent 50%);
-            animation: bgPulse 10s ease-in-out infinite;
+                radial-gradient(circle at 20% 50%, rgba(0, 212, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 0, 255, 0.15) 0%, transparent 50%);
+            animation: bgPulse 15s ease-in-out infinite;
         }
         
-        @keyframes bgPulse {
-            0%, 100% { opacity: 0.8; }
-            50% { opacity: 1; }
-        }
+        @keyframes bgPulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
         
-        /* Utility Classes */
         .hidden { display: none !important; }
-        .flex { display: flex; }
-        .flex-col { flex-direction: column; }
-        .items-center { align-items: center; }
-        .justify-center { justify-content: center; }
-        .gap-2 { gap: 0.5rem; }
-        .gap-4 { gap: 1rem; }
-        .w-full { width: 100%; }
-        .text-center { text-align: center; }
+        .flex { display: flex; } .flex-col { flex-direction: column; }
+        .items-center { align-items: center; } .justify-center { justify-content: center; }
+        .gap-2 { gap: 0.5rem; } .gap-4 { gap: 1rem; }
+        .w-full { width: 100%; } .text-center { text-align: center; }
         
         /* Screens */
         .screen {
-            min-height: 100vh;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+            min-height: 100vh; display: none; flex-direction: column;
+            align-items: center; justify-content: center; padding: 20px;
         }
-        
-        .screen.active {
-            display: flex;
-        }
+        .screen.active { display: flex; }
         
         /* Login Screen */
         .login-container {
             background: linear-gradient(145deg, var(--bg-card) 0%, var(--bg-hover) 100%);
-            border: 2px solid var(--primary);
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 0 40px rgba(0, 212, 255, 0.3);
-            max-width: 450px;
-            width: 100%;
-            position: relative;
-            overflow: hidden;
+            border: 2px solid var(--primary); border-radius: 20px; padding: 40px;
+            box-shadow: 0 0 40px rgba(0, 212, 255, 0.3); max-width: 450px; width: 100%;
+            position: relative; overflow: hidden;
         }
         
         .login-container::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
+            content: ''; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px;
             background: linear-gradient(45deg, var(--primary), var(--secondary), var(--primary));
-            z-index: -1;
-            border-radius: 20px;
-            animation: borderRotate 3s linear infinite;
-            opacity: 0.5;
+            z-index: -1; border-radius: 20px; animation: borderRotate 3s linear infinite; opacity: 0.5;
         }
         
-        @keyframes borderRotate {
-            0% { filter: hue-rotate(0deg); }
-            100% { filter: hue-rotate(360deg); }
-        }
+        @keyframes borderRotate { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
         
         .logo-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 2.5rem;
-            font-weight: 900;
-            text-align: center;
-            margin-bottom: 30px;
-            text-transform: uppercase;
+            font-family: 'Orbitron', sans-serif; font-size: 2.5rem; font-weight: 900;
+            text-align: center; margin-bottom: 30px; text-transform: uppercase;
             letter-spacing: 3px;
             background: linear-gradient(90deg, var(--primary), var(--secondary), var(--primary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             animation: titleGlow 2s ease-in-out infinite alternate;
         }
         
-        @keyframes titleGlow {
-            from { filter: brightness(1); }
-            to { filter: brightness(1.3); }
-        }
+        @keyframes titleGlow { from { filter: brightness(1); } to { filter: brightness(1.3); } }
         
-        .input-group {
-            margin-bottom: 20px;
-        }
-        
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: var(--primary);
-            font-weight: 600;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            font-size: 0.9rem;
-        }
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; margin-bottom: 8px; color: var(--primary); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; font-size: 0.9rem; }
         
         .input-field {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #2a2a4a;
-            background: rgba(0, 0, 0, 0.3);
-            color: var(--text);
-            border-radius: 8px;
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 1rem;
-            transition: all 0.3s;
-            outline: none;
+            width: 100%; padding: 15px; border: 2px solid #2a2a4a; background: rgba(0, 0, 0, 0.3);
+            color: var(--text); border-radius: 8px; font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem; transition: all 0.3s; outline: none;
         }
-        
-        .input-field:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
-        }
+        .input-field:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(0, 212, 255, 0.4); }
         
         .btn-gaming {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(45deg, var(--primary) 0%, #0099cc 100%);
-            border: none;
-            color: #fff;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 10px;
+            width: 100%; padding: 15px; background: linear-gradient(45deg, var(--primary) 0%, #0099cc 100%);
+            border: none; color: #fff; font-family: 'Orbitron', sans-serif; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 2px; border-radius: 8px;
+            cursor: pointer; transition: all 0.3s; margin-top: 10px;
         }
+        .btn-gaming:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0, 212, 255, 0.4); }
+        .btn-secondary { background: linear-gradient(45deg, var(--secondary) 0%, #cc00cc 100%); }
+        .btn-accent { background: linear-gradient(45deg, var(--accent) 0%, #00cc66 100%); }
+        .btn-warning { background: linear-gradient(45deg, var(--warning) 0%, #cc8800 100%); }
+        .btn-danger { background: linear-gradient(45deg, var(--danger) 0%, #cc0000 100%); }
         
-        .btn-gaming:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0, 212, 255, 0.4);
-        }
-        
-        .btn-secondary {
-            background: linear-gradient(45deg, var(--secondary) 0%, #cc00cc 100%);
-        }
-        
-        .btn-accent {
-            background: linear-gradient(45deg, var(--accent) 0%, #00cc66 100%);
-        }
-        
-        .btn-warning {
-            background: linear-gradient(45deg, var(--warning) 0%, #cc8800 100%);
-        }
-        
-        .btn-danger {
-            background: linear-gradient(45deg, var(--danger) 0%, #cc0000 100%);
-        }
-        
-        .error-msg {
-            color: var(--danger);
-            margin-top: 15px;
-            text-align: center;
-            font-size: 0.9rem;
-        }
+        .error-msg { color: var(--danger); margin-top: 15px; text-align: center; font-size: 0.9rem; }
         
         /* Profile Setup */
         .setup-container {
             background: linear-gradient(145deg, var(--bg-card) 0%, var(--bg-hover) 100%);
-            border: 2px solid var(--primary);
-            border-radius: 20px;
-            padding: 40px;
-            max-width: 600px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
+            border: 2px solid var(--primary); border-radius: 20px; padding: 40px;
+            max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto;
         }
         
         .profile-photo-upload {
-            width: 150px;
-            height: 150px;
-            border: 3px dashed var(--primary);
-            border-radius: 50%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin: 0 auto 20px;
-            position: relative;
-            overflow: hidden;
+            width: 150px; height: 150px; border: 3px dashed var(--primary); border-radius: 50%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.3s; margin: 0 auto 20px; position: relative; overflow: hidden;
         }
-        
-        .profile-photo-upload:hover {
-            border-color: var(--secondary);
-            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
-        }
-        
-        .profile-photo-upload img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            position: absolute;
-        }
-        
-        .photo-placeholder {
-            font-size: 3rem;
-            color: var(--primary);
-        }
+        .Profile-photo-upload:hover { border-color: var(--secondary); box-shadow: 0 0 20px rgba(0, 212, 255, 0.3); }
+        .Profile-photo-upload img { width: 100%; height: 100%; object-fit: cover; position: absolute; }
+        .photo-placeholder { font-size: 3rem; color: var(--primary); }
         
         /* Stream Selection */
-        .stream-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            width: 100%;
-            max-width: 800px;
-        }
-        
+        .stream-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; width: 100%; max-width: 800px; }
         .stream-card {
             background: linear-gradient(145deg, var(--bg-card) 0%, var(--bg-hover) 100%);
-            border: 2px solid transparent;
-            border-radius: 15px;
-            padding: 30px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: center;
+            border: 2px solid transparent; border-radius: 15px; padding: 30px;
+            cursor: pointer; transition: all 0.3s; text-align: center;
         }
-        
-        .stream-card:hover, .stream-card.selected {
-            border-color: var(--primary);
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
-        }
-        
-        .stream-icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
-        }
-        
-        .stream-name {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.3rem;
-            color: var(--primary);
-            margin-bottom: 10px;
-        }
+        .stream-card:hover, .stream-card.selected { border-color: var(--primary); transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3); }
+        .stream-icon { font-size: 3rem; margin-bottom: 15px; }
+        .stream-name { font-family: 'Orbitron', sans-serif; font-size: 1.3rem; color: var(--primary); margin-bottom: 10px; }
         
         /* App Layout */
-        .app-container {
-            display: none;
-            min-height: 100vh;
-        }
-        
-        .app-container.active {
-            display: block;
-        }
+        .app-container { display: none; min-height: 100vh; }
+        .app-container.active { display: block; }
         
         .app-header {
             background: linear-gradient(180deg, rgba(16, 16, 40, 0.95) 0%, transparent 100%);
-            padding: 15px 30px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+            padding: 15px 30px; position: sticky; top: 0; z-index: 100;
+            backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0, 212, 255, 0.2);
         }
         
-        .header-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
+        .header-content { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
         .header-logo {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.5rem;
-            font-weight: 900;
+            font-family: 'Orbitron', sans-serif; font-size: 1.5rem; font-weight: 900;
             background: linear-gradient(90deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
         
-        .header-user {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
+        .header-user { display: flex; align-items: center; gap: 15px; }
         .user-profile-mini {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            padding: 5px 15px;
-            border-radius: 25px;
-            background: rgba(0, 212, 255, 0.1);
-            border: 1px solid rgba(0, 212, 255, 0.3);
-            transition: all 0.3s;
+            display: flex; align-items: center; gap: 10px; cursor: pointer;
+            padding: 5px 15px; border-radius: 25px; background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3); transition: all 0.3s;
         }
-        
-        .user-profile-mini:hover {
-            background: rgba(0, 212, 255, 0.2);
-        }
-        
-        .mini-avatar {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            border: 2px solid var(--primary);
-            object-fit: cover;
-        }
-        
-        .mini-info {
-            line-height: 1.2;
-        }
-        
-        .mini-name {
-            font-weight: 700;
-            font-size: 0.9rem;
-        }
-        
-        .mini-stream {
-            font-size: 0.75rem;
-            color: var(--primary);
-        }
+        .user-profile-mini:hover { background: rgba(0, 212, 255, 0.2); }
+        .mini-avatar { width: 35px; height: 35px; border-radius: 50%; border: 2px solid var(--primary); object-fit: cover; }
+        .mini-info { line-height: 1.2; }
+        .mini-name { font-weight: 700; font-size: 0.9rem; }
+        .mini-stream { font-size: 0.75rem; color: var(--primary); }
         
         /* Home Dashboard */
-        .home-dashboard {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
-        
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-            margin-top: 30px;
-        }
-        
+        .home-dashboard { max-width: 1400px; margin: 0 auto; padding: 40px 20px; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin-top: 30px; }
         .dashboard-card {
             background: linear-gradient(145deg, var(--bg-card) 0%, var(--bg-hover) 100%);
-            border: 1px solid rgba(0, 212, 255, 0.2);
-            border-radius: 20px;
-            padding: 30px;
-            cursor: pointer;
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
+            border: 1px solid rgba(0, 212, 255, 0.2); border-radius: 20px; padding: 30px;
+            cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden;
         }
-        
         .dashboard-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            transform: scaleX(0);
-            transition: transform 0.3s;
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary)); transform: scaleX(0); transition: transform 0.3s;
         }
-        
-        .dashboard-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0, 212, 255, 0.2);
-            border-color: var(--primary);
-        }
-        
-        .dashboard-card:hover::before {
-            transform: scaleX(1);
-        }
-        
-        .card-icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            display: block;
-        }
-        
-        .card-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.3rem;
-            color: var(--primary);
-            margin-bottom: 10px;
-        }
-        
-        .card-desc {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
+        .dashboard-card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(0, 212, 255, 0.2); border-color: var(--primary); }
+        .dashboard-card:hover::before { transform: scaleX(1); }
+        .card-icon { font-size: 3rem; margin-bottom: 15px; display: block; }
+        .card-title { font-family: 'Orbitron', sans-serif; font-size: 1.3rem; color: var(--primary); margin-bottom: 10px; }
+        .card-desc { color: var(--text-muted); font-size: 0.9rem; }
         
         /* Feature Sections */
-        .feature-section {
-            display: none;
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 30px 20px;
-        }
-        
-        .feature-section.active {
-            display: block;
-        }
+        .feature-section { display: none; max-width: 1400px; margin: 0 auto; padding: 30px 20px; }
+        .feature-section.active { display: block; }
         
         .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid rgba(0, 212, 255, 0.2);
         }
-        
-        .section-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.8rem;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
+        .section-title { font-family: 'Orbitron', sans-serif; font-size: 1.8rem; color: var(--primary); display: flex; align-items: center; gap: 10px; }
         .back-btn {
-            padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid var(--primary);
-            color: var(--primary);
-            border-radius: 8px;
-            cursor: pointer;
-            font-family: 'Rajdhani', sans-serif;
-            font-weight: 600;
-            transition: all 0.3s;
+            padding: 10px 20px; background: rgba(255, 255, 255, 0.1); border: 1px solid var(--primary);
+            color: var(--primary); border-radius: 8px; cursor: pointer;
+            font-family: 'Rajdhani', sans-serif; font-weight: 600; transition: all 0.3s;
         }
-        
-        .back-btn:hover {
-            background: var(--primary);
-            color: var(--bg-dark);
-        }
+        .back-btn:hover { background: var(--primary); color: var(--bg-dark); }
         
         /* Timer Section */
         .timer-container {
             background: linear-gradient(145deg, var(--bg-card) 0%, var(--bg-hover) 100%);
-            border-radius: 20px;
-            padding: 40px;
-            border: 1px solid rgba(0, 212, 255, 0.2);
-            max-width: 600px;
-            margin: 0 auto;
+            border-radius: 20px; padding: 40px; border: 1px solid rgba(0, 212, 255, 0.2); max-width: 800px; margin: 0 auto;
         }
-        
-        .subject-selector {
-            margin-bottom: 30px;
-        }
-        
-        .subject-selector label {
-            display: block;
-            margin-bottom: 10px;
-            color: var(--primary);
-            font-weight: 600;
-        }
-        
+        .subject-selector { margin-bottom: 30px; }
+        .subject-selector label { display: block; margin-bottom: 10px; color: var(--primary); font-weight: 600; }
         .subject-dropdown {
-            width: 100%;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.3);
-            border: 2px solid #2a2a4a;
-            color: var(--text);
-            border-radius: 8px;
-            font-size: 1rem;
-            cursor: pointer;
+            width: 100%; padding: 15px; background: rgba(0, 0, 0, 0.3); border: 2px solid #2a2a4a;
+            color: var(--text); border-radius: 8px; font-size: 1rem; cursor: pointer;
         }
         
         .timer-display {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 6rem;
-            font-weight: 900;
-            text-align: center;
-            color: var(--primary);
-            text-shadow: 0 0 30px rgba(0, 212, 255, 0.8);
-            margin: 30px 0;
-            letter-spacing: 5px;
+            font-family: 'Orbitron', sans-serif; font-size: 5rem; font-weight: 900; text-align: center;
+            color: var(--primary); text-shadow: 0 0 30px rgba(0, 212, 255, 0.8); margin: 30px 0; letter-spacing: 5px;
         }
+        .timer-display.break { color: var(--warning); text-shadow: 0 0 30px rgba(255, 170, 0, 0.8); }
         
-        .timer-display.break {
-            color: var(--warning);
-            text-shadow: 0 0 30px rgba(255, 170, 0, 0.8);
-        }
-        
-        .timer-controls {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            margin-bottom: 30px;
-        }
-        
+        .timer-controls { display: flex; gap: 15px; justify-content: center; margin-bottom: 30px; flex-wrap: wrap; }
         .timer-btn {
-            padding: 15px 40px;
-            border: none;
-            border-radius: 10px;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 1rem;
+            padding: 15px 40px; border: none; border-radius: 10px; font-family: 'Orbitron', sans-serif;
+            font-weight: 700; text-transform: uppercase; letter-spacing: 1px; cursor: pointer;
+            transition: all 0.3s; font-size: 1rem;
         }
-        
-        .mode-toggle {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
+        .mode-toggle { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
         .mode-btn {
-            padding: 10px 25px;
-            background: rgba(0, 0, 0, 0.3);
-            border: 2px solid #2a2a4a;
-            color: var(--text-muted);
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-family: 'Rajdhani', sans-serif;
-            font-weight: 600;
+            padding: 10px 25px; background: rgba(0, 0, 0, 0.3); border: 2px solid #2a2a4a;
+            color: var(--text-muted); border-radius: 25px; cursor: pointer; transition: all 0.3s;
+            font-family: 'Rajdhani', sans-serif; font-weight: 600;
         }
-        
-        .mode-btn.active {
-            border-color: var(--primary);
-            color: var(--primary);
-            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
-        }
+        .mode-btn.active { border-color: var(--primary); color: var(--primary); box-shadow: 0 0 15px rgba(0, 212, 255, 0.3); }
         
         /* Daily Targets */
         .targets-container {
             background: linear-gradient(145deg, var(--bg-card) 0%, var(--bg-hover) 100%);
-            border-radius: 20px;
-            padding: 30px;
-            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 20px; padding: 30px; border: 1px solid rgba(0, 212, 255, 0.2);
         }
-        
-        .add-target-form {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 25px;
+        .add-target-form { display: flex; gap: 10px; margin-bottom: 25px; }
+        .target-input { flex: 1; padding: 12px; background: rgba(0, 0, 0, 0.3); border: 1px solid #2a2a4a; color: var(--text); border-radius: 8px; font-size: 1rem; }
+        .Target-list { display: flex; flex-direction: column; gap: 12px; }
+        .Target-item {
+            background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(0, 212, 255, 0.1); border-radius: 12px;
+            padding: 15px 20px; display: flex; align-items: center; gap: 15px; transition: all 0.3s;
         }
+        .Target-item:hover { border-color: rgba(0, 212, 255, 0.3); transform: translateX(5px); }
+        .Target-checkbox { width: 24px; height: 24px; cursor: pointer; accent-color: var(--primary); }
+        .Target-text { flex: 1; font-size: 1.1rem; }
+        .Target-text.completed { text-decoration: line-through; color: var(--text-muted); }
+        .Target-delete { background: rgba(255, 68, 68, 0.2); border: none; color: var(--danger); padding: 8px 15px; border-radius: 6px; cursor: pointer; transition: all 0.3s; }
+        .Target-delete:hover { background: rgba(255, 68, 68, 0.4); }
         
-        .target-input {
-            flex: 1;
-            padding: 12px;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid #2a2a4a;
-            color: var(--text);
-            border-radius: 8px;
-            font-size: 1rem;
+        /* Calendar - FIXED */
+        .calendar-wrapper { 
+            background: linear-gradient(145deg, var(--bg-card) 0%, var(--bg-hover) 100%);
+            border-radius: 20px; padding: 30px; border: 1px solid rgba(0, 212, 255, 0.2);
         }
-        
-        .target-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .calendar-nav {
+            background: rgba(0, 0, 0, 0.3); border: 1px solid var(--primary); color: var(--primary);
+            padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: 'Orbitron', sans-serif; transition: all 0.3s;
         }
+        .calendar-nav:hover { background: var(--primary); color: var(--bg-dark); }
+        .calendar-month { font-family: 'Orbitron', sans-serif; font-size: 1.3rem; color: var(--primary); }
         
-        .target-item {
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(0, 212, 255, 0.1);
-            border-radius: 12px;
-            padding: 15px 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            transition: all 0.3s;
+        .calendar-grid-container { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
+        .calendar-day-header {
+            text-align: center; color: var(--primary); font-weight: 600; padding: 10px; font-size: 0.9rem;
+            text-transform: uppercase;
         }
-        
-        .target-item:hover {
-            border-color: rgba(0, 212, 255, 0.3);
-            transform: translateX(5px);
+        .calendar-day {
+            aspect-ratio: 1; background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(0, 212, 255, 0.1);
+            border-radius: 10px; padding: 10px; cursor: pointer; transition: all 0.3s; position: relative;
+            min-height: 100px; display: flex; flex-direction: column;
         }
-        
-        .target-checkbox {
-            width: 24px;
-            height: 24px;
-            cursor: pointer;
-            accent-color: var(--primary);
-        }
-        
-        .target-text {
-            flex: 1;
-            font-size: 1.1rem;
-        }
-        
-        .target-text.completed {
-            text-decoration: line-through;
-            color: var(--text-muted);
-        }
-        
-        .target-delete {
-            background: rgba(255, 68, 68, 0.2);
-            border: none;
-            color: var(--danger);
-            padding: 8px 15px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .target-delete:hover {
-            background: rgba(255, 68, 68, 0.4);
-        }
-        
-/* Calendar */
-.calendar-container {
-    background: linear-gradient(145deg, var(--bg-card) 0%, var(--bg-hover) 100%);
-    border-radius: 20px;
-    padding: 30px;
-    border: 1px solid rgba(0, 212, 255, 0.2);
-}
-
-.calendar-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 25px;
-}
-
-.calendar-nav {
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid var(--primary);
-    color: var(--primary);
-    padding: 10px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-family: 'Orbitron', sans-serif;
-    transition: all 0.3s;
-}
-
-.calendar-nav:hover {
-    background: var(--primary);
-    color: var(--bg-dark);
-}
-
-.calendar-month {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 1.3rem;
-    color: var(--primary);
-}
-
-.calendar-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 10px;
-}
-
-.calendar-day-header {
-    text-align: center;
-    color: var(--primary);
-    font-weight: 600;
-    padding: 10px;
-    font-size: 0.9rem;
-}
-
-.calendar-day {
-    aspect-ratio: 1;
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(0, 212, 255, 0.1);
-    border-radius: 10px;
-    padding: 8px;
-    cursor: pointer;
-    transition: all 0.3s;
-    position: relative;
-}
-
-.calendar-day:hover {
-    border-color: var(--primary);
-    transform: scale(1.05);
-}
-
-.calendar-day.active {
-    border-color: var(--primary);
-    box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
-}
-
-.calendar-day.has-data {
-    background: rgba(0, 212, 255, 0.15);
-}
-
-.day-number {
-    font-weight: 600;
-    font-size: 1rem;
-}
-
-.day-info {
-    font-size: 0.75rem;
-    color: var(--primary);
-    margin-top: 5px;
-}
+        .calendar-day:hover { border-color: var(--primary); transform: scale(1.05); }
+        .calendar-day.active { border-color: var(--primary); box-shadow: 0 0 15px rgba(0, 212, 255, 0.3); background: rgba(0, 212, 255, 0.2); }
+        .calendar-day.has-data { background: rgba(0, 255, 136, 0.2); border-color: var(--accent); }
+        .day-number { font-weight: 700; font-size: 1.2rem; color: var(--primary); }
+        .day-info { font-size: 0.8rem; color: var(--text-muted); margin-top: 5px; }
+        .day-studied { font-size: 0.75rem; color: var(--accent); margin-top: auto; }
         
         /* Marks Section */
-        .marks-container {
-            display: grid;
-            grid-template-columns: 300px 1fr;
-            gap: 30px;
-        }
-        
-        @media (max-width: 968px) {
-            .marks-container {
-                grid-template-columns: 1fr;
-            }
-        }
+        .marks-container { display: grid; grid-template-columns: 300px 1fr; gap: 30px; }
+        @media (max-width: 968px) { .marks-container { grid-template-columns: 1fr; } }
         
         .marks-sidebar {
             background: linear-gradient(145deg, var(--bg-card) 0%, var(--bg-hover) 100%);
-            border-radius: 20px;
-            padding: 25px;
-            border: 1px solid rgba(0, 212, 255, 0.2);
-            height: fit-content;
+            border-radius: 20px; padding: 25px; border: 1px solid rgba(0, 212, 255, 0.2); height: fit-content;
         }
+        .category-list { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        .category-item {
+            background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(0, 212, 255, 0.1); border-radius: 10px;
+            padding: 15px; cursor: pointer; transition: all 0.3s; display: flex; justify-content: space-between; align-items: center;
+        }
+        .category-item:hover, .category-item.active { border-color: var(--primary); background: rgba(0, 212, 255, 0.1); }
         
         .marks-main {
             background: linear-gradient(145deg, var(--bg-card) 0%, var(--bg-hover) 100%);
-            border-radius: 20px;
-            padding: 30px;
-            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 20px; padding: 30px; border: 1px solid rgba(0, 212, 255, 0.2);
         }
-        
-        .category-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        .category-item {
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(0, 212, 255, 0.1);
-            border-radius: 10px;
-            padding: 15px;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .category-item:hover, .category-item.active {
-            border-color: var(--primary);
-            background: rgba(0, 212, 255, 0.1);
-        }
-        
-        .add-category-form {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(0, 212, 255, 0.2);
-        }
-        
-        .marks-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        
-        .marks-table th, .marks-table td {
-            padding: 15px;
-            text-align: left;
-            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
-        }
-        
-        .marks-table th {
-            color: var(--primary);
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-        }
-        
-        .mark-input {
-            width: 80px;
-            padding: 8px;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid #2a2a4a;
-            color: var(--text);
-            border-radius: 6px;
-            text-align: center;
-        }
+        .marks-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .marks-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .marks-table th, .marks-table td { padding: 15px; text-align: left; border-bottom: 1px solid rgba(0, 212, 255, 0.2); }
+        .marks-table th { color: var(--primary); font-family: 'Orbitron', sans-serif; font-size: 0.9rem; text-transform: uppercase; }
+        .mark-input { width: 80px; padding: 8px; background: rgba(0, 0, 0, 0.3); border: 1px solid #2a2a4a; color: var(--text); border-radius: 6px; text-align: center; }
         
         /* Analytics */
-        .analytics-container {
-            display: grid;
-            grid-template-columns: 250px 1fr;
-            gap: 30px;
-        }
-        
-        @media (max-width: 968px) {
-            .analytics-container {
-                grid-template-columns: 1fr;
-            }
-        }
+        .analytics-container { display: grid; grid-template-columns: 250px 1fr; gap: 30px; }
+        @media (max-width: 968px) { .analytics-container { grid-template-columns: 1fr; } }
         
         .analytics-sidebar {
             background: linear-gradient(145deg, var(--bg-card) 0%, var(--bg-hover) 100%);
-            border-radius: 20px;
-            padding: 25px;
-            border: 1px solid rgba(0, 212, 255, 0.2);
-            height: fit-content;
+            border-radius: 20px; padding: 25px; border: 1px solid rgba(0, 212, 255, 0.2); height: fit-content;
         }
-        
-        .analytics-main {
-            background: linear-gradient(145deg, var(--bg-card) 0%, var(--bg-hover) 100%);
-            border-radius: 20px;
-            padding: 30px;
-            border: 1px solid rgba(0, 212, 255, 0.2);
-        }
-        
-        .analytics-menu {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
+        .analytics-menu { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
         .analytics-item {
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(0, 212, 255, 0.1);
-            border-radius: 10px;
-            padding: 15px;
-            cursor: pointer;
-            transition: all 0.3s;
+            background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(0, 212, 255, 0.1); border-radius: 10px;
+            padding: 15px; cursor: pointer; transition: all 0.3s;
         }
+        .analytics-item:hover, .analytics-item.active { border-color: var(--primary); background: rgba(0, 212, 255, 0.1); }
         
-        .analytics-item:hover, .analytics-item.active {
-            border-color: var(--primary);
-            background: rgba(0, 212, 255, 0.1);
-        }
-        
-        .chart-container {
-            position: relative;
-            height: 400px;
-            margin-top: 30px;
-        }
-        
-        .time-filter {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        
+        .chart-container { position: relative; height: 400px; margin-top: 30px; }
+        .time-filter { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
         .filter-btn {
-            padding: 8px 16px;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid #2a2a4a;
-            color: var(--text-muted);
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-family: 'Rajdhani', sans-serif;
+            padding: 8px 16px; background: rgba(0, 0, 0, 0.3); border: 1px solid #2a2a4a; color: var(--text-muted);
+            border-radius: 20px; cursor: pointer; transition: all 0.3s;
         }
-        
-        .filter-btn.active {
-            border-color: var(--primary);
-            color: var(--primary);
-            background: rgba(0, 212, 255, 0.1);
-        }
+        .filter-btn.active { border-color: var(--primary); color: var(--primary); background: rgba(0, 212, 255, 0.1); }
         
         /* Profile Modal */
         .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85); z-index: 1000; justify-content: center; align-items: center; padding: 20px;
         }
-        
-        .modal-overlay.active {
-            display: flex;
-        }
-        
+        .modal-overlay.active { display: flex; }
         .modal-content {
             background: linear-gradient(145deg, var(--bg-card) 0%, var(--bg-hover) 100%);
-            border: 2px solid var(--primary);
-            border-radius: 20px;
-            padding: 40px;
-            max-width: 500px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            position: relative;
+            border: 2px solid var(--primary); border-radius: 20px; padding: 40px; max-width: 600px;
+            width: 100%; max-height: 90vh; overflow-y: auto; position: relative;
         }
-        
-        .modal-close {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 1.5rem;
-            cursor: pointer;
-            transition: color 0.3s;
-        }
-        
-        .modal-close:hover {
-            color: var(--danger);
-        }
-        
-        .profile-display {
-            text-align: center;
-        }
-        
-        .profile-avatar-large {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            border: 3px solid var(--primary);
-            object-fit: cover;
-            margin-bottom: 20px;
-        }
-        
-        .profile-field {
-            margin-bottom: 15px;
-            text-align: left;
-        }
-        
-        .profile-label {
-            color: var(--primary);
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 5px;
-        }
-        
-        .profile-value {
-            font-size: 1.1rem;
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-        }
+        .modal-close { position: absolute; top: 20px; right: 20px; background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; transition: color 0.3s; }
+        .modal-close:hover { color: var(--danger); }
+        .profile-display { text-align: center; }
+        .profile-avatar-large { width: 120px; height: 120px; border-radius: 50%; border: 3px solid var(--primary); object-fit: cover; margin-bottom: 20px; }
+        .profile-field { margin-bottom: 15px; text-align: left; }
+        .profile-label { color: var(--primary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        .profile-value { font-size: 1.1rem; padding: 10px; background: rgba(0, 0, 0, 0.2); border-radius: 8px; }
         
         /* Day Detail Modal */
-        .day-detail-content {
-            max-width: 600px;
-        }
+        .day-detail-content { max-width: 600px; }
+        .detail-item { background: rgba(0, 0, 0, 0.2); border-radius: 10px; padding: 15px; margin-bottom: 15px; }
+        .detail-label { color: var(--primary); font-size: 0.85rem; text-transform: uppercase; margin-bottom: 5px; }
+        .detail-value { font-size: 1.2rem; font-weight: 600; }
         
-        .detail-item {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 15px;
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9);
+            display: none; justify-content: center; align-items: center; z-index: 2000; flex-direction: column;
         }
+        .loading-overlay.active { display: flex; }
+        .spinner {
+            width: 50px; height: 50px; border: 4px solid rgba(0, 212, 255, 0.3);
+            border-top: 4px solid var(--primary); border-radius: 50%;
+            animation: spin 1s linear infinite; margin-bottom: 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        .detail-label {
-            color: var(--primary);
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            margin-bottom: 5px;
-        }
-        
-        .detail-value {
-            font-size: 1.2rem;
-            font-weight: 600;
-        }
+        /* Sync Status */
+        .sync-status { position: fixed; bottom: 20px; right: 20px; padding: 10px 20px; background: rgba(0,0,0,0.8); border-radius: 20px; font-size: 0.8rem; color: var(--primary); border: 1px solid var(--primary); display: none; }
+        .sync-status.show { display: block; }
+        .sync-status.syncing { color: var(--warning); }
+        .sync-status.synced { color: var(--success); }
     </style>
 </head>
 <body>
     <div class="bg-animation"></div>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <div>Loading...</div>
+    </div>
+    <div class="sync-status" id="syncStatus">Syncing...</div>
 
     <!-- LOGIN SCREEN -->
     <div id="loginScreen" class="screen active">
         <div class="login-container">
             <h1 class="logo-title">STUDY TRACKER PRO</h1>
             <div class="input-group">
-                <label>Access Code</label>
-                <input type="password" id="loginCode" class="input-field" placeholder="Enter your code">
-            </div>
+                <label>Email</label>
+                <input type="email" id="loginEmail" class="input-field" placeholder="Enter your email">
             <div class="input-group">
                 <label>Password</label>
                 <input type="password" id="loginPassword" class="input-field" placeholder="Enter password">
             </div>
-            <button class="btn-gaming" onclick="handleLogin()">Initialize System</button>
+            <button class="btn-gaming" onclick="handleLogin()">Login</button>
             <div class="error-msg" id="loginError"></div>
+            <p style="text-align: center; margin-top: 20px; color: var(--text-muted); font-size: 0.9rem;">
+                Demo: student@example.com / password: 123456
+            </p>
         </div>
     </div>
 
-    <!-- PROFILE SETUP (First Time) -->
+    <!-- PROFILE SETUP -->
     <div id="profileSetupScreen" class="screen">
         <div class="setup-container">
             <h2 class="logo-title">CREATE YOUR PROFILE</h2>
-            
             <div class="profile-photo-upload" onclick="document.getElementById('photoInput').click()">
                 <img id="previewPhoto" class="hidden" alt="Profile">
                 <div class="photo-placeholder" id="photoPlaceholder">📷</div>
                 <input type="file" id="photoInput" class="hidden" accept="image/*" onchange="handlePhotoUpload(event)">
             </div>
-            
             <div class="input-group">
                 <label>Full Name</label>
                 <input type="text" id="setupName" class="input-field" placeholder="Enter your full name">
             </div>
-            
             <div class="input-group">
-                <label>Birthday</label>
-                <input type="date" id="setupBirthday" class="input-field">
+                <label>Stream</label>
+                <select id="SetupStream" class="input-field">
+                    <option value="Science">Science</option>
+                    <option value="Commerce">Commerce</option>
+                    <option value="Arts">Arts</option>
+                    <option value="Engineering">Engineering</option>
+                </select>
             </div>
-            
-            <div class="input-group">
-                <label>Email</label>
-                <input type="email" id="setupEmail" class="input-field" placeholder="your@email.com">
-            </div>
-            
-            <div class="input-group">
-                <label>School/Institution</label>
-                <input type="text" id="setupSchool" class="input-field" placeholder="Enter school name">
-            </div>
-            
-            <button class="btn-gaming" onclick="goToStreamSelection()">Continue</button>
-        </div>
-    </div>
-
-    <!-- STREAM SELECTION (First Time) -->
-    <div id="streamScreen" class="screen">
-        <h2 class="logo-title">SELECT YOUR STREAM</h2>
-        <div class="stream-grid">
-            <div class="stream-card" onclick="selectStream('science')">
-                <span class="stream-icon">🔬</span>
-                <div class="stream-name">Science Stream</div>
-                <div class="stream-desc">Physics, Chemistry, Biology & More</div>
-            </div>
-            <div class="stream-card" onclick="selectStream('commerce')">
-                <span class="stream-icon">💼</span>
-                <div class="stream-name">Commerce Stream</div>
-                <div class="stream-desc">Accounting, Economics, Business</div>
-            </div>
-            <div class="stream-card" onclick="selectStream('arts')">
-                <span class="stream-icon">🎨</span>
-                <div class="stream-name">Arts Stream</div>
-                <div class="stream-desc">Literature, History, Philosophy</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- SUBJECT SETUP (First Time) -->
-    <div id="subjectSetupScreen" class="screen">
-        <div class="setup-container">
-            <h2 class="logo-title">ADD YOUR SUBJECTS</h2>
-            <div id="subjectInputs">
-                <div class="input-group">
-                    <label>Subject 1</label>
-                    <input type="text" class="setup-subject input-field" placeholder="e.g., Physics">
-                </div>
-                <div class="input-group">
-                    <label>Subject 2</label>
-                    <input type="text" class="setup-subject input-field" placeholder="e.g., Chemistry">
-                </div>
-                <div class="input-group">
-                    <label>Subject 3</label>
-                    <input type="text" class="setup-subject input-field" placeholder="e.g., Mathematics">
-                </div>
-            </div>
-            <button class="btn-gaming" onclick="completeSetup()">Complete Setup</button>
+            <button class="btn-gaming" onclick="completeProfileSetup()">Continue</button>
         </div>
     </div>
 
     <!-- MAIN APP -->
     <div id="appContainer" class="app-container">
-        <!-- Header -->
         <header class="app-header">
             <div class="header-content">
                 <div class="header-logo">⚡ STUDY TRACKER PRO</div>
@@ -1136,38 +444,33 @@
                 <div class="dashboard-grid">
                     <div class="dashboard-card" onclick="showFeature('timer')">
                         <span class="card-icon">⏱️</span>
-                        <div class="card-title">Study Timer</div>
-                        <div class="card-desc">40min focus sessions with smart breaks</div>
+ <div class="card-title">Study Timer</div>
+                        <div class="card-desc">Pomodoro & Custom Sessions</div>
                     </div>
-                    
                     <div class="dashboard-card" onclick="showFeature('stopwatch')">
                         <span class="card-icon">⏲️</span>
                         <div class="card-title">Stopwatch</div>
-                        <div class="card-desc">Track unlimited study sessions</div>
+                        <div class="card-desc">Track unlimited sessions</div>
                     </div>
-                    
                     <div class="dashboard-card" onclick="showFeature('targets')">
                         <span class="card-icon">🎯</span>
                         <div class="card-title">Daily Targets</div>
-                        <div class="card-desc" id="homeTargetsCount">Manage your daily goals</div>
+                        <div class="card-desc" id="homeTargetsCount">Manage daily goals</div>
                     </div>
-                    
                     <div class="dashboard-card" onclick="showFeature('calendar')">
                         <span class="card-icon">📅</span>
                         <div class="card-title">Calendar</div>
-                        <div class="card-desc">View your study history</div>
+                        <div class="card-desc">View study history</div>
                     </div>
-                    
                     <div class="dashboard-card" onclick="showFeature('marks')">
                         <span class="card-icon">📝</span>
-                        <div class="card-title">Add Marks</div>
-                        <div class="card-desc">Track your academic progress</div>
+                        <div class="card-title">Academic Marks</div>
+                        <div class="card-desc">Track your progress</div>
                     </div>
-                    
                     <div class="dashboard-card" onclick="showFeature('analytics')">
                         <span class="card-icon">📊</span>
                         <div class="card-title">Analytics</div>
-                        <div class="card-desc">Visualize your progress</div>
+                        <div class="card-desc">Visualize achievements</div>
                     </div>
                 </div>
             </div>
@@ -1177,37 +480,30 @@
         <div id="timerScreen" class="feature-section">
             <div class="section-header">
                 <h2 class="section-title">⏱️ STUDY TIMER</h2>
-                <button class="back-btn" onclick="goHome()">← Back to Home</button>
+                <button class="back-btn" onclick="goHome()">← Back</button>
             </div>
-            
             <div class="timer-container">
                 <div class="subject-selector">
                     <label>Select Subject</label>
-                    <select id="timerSubject" class="subject-dropdown">
-                        <option value="">Choose a subject...</option>
-                    </select>
+                    <select id="timerSubject" class="subject-dropdown"><option value="">Choose subject...</option></select>
                 </div>
-                
                 <div class="mode-toggle">
                     <button class="mode-btn active" onclick="setTimerMode('pomodoro')">Pomodoro (40m)</button>
                     <button class="mode-btn" onclick="setTimerMode('short')">Short (25m)</button>
-                    <button class="mode-btn" onclick="setTimerMode('long')">Long (60m)</button>
+                    <button class="mode-btn" onclick="SetTimerMode('long')">Long (60m)</button>
+                    <button class="mode-btn" onclick="setTimerMode('custom')">Custom</button>
                 </div>
-                
                 <div class="timer-display" id="timerDisplay">40:00</div>
-                
                 <div class="timer-controls">
                     <button class="timer-btn btn-gaming btn-accent" id="timerStartBtn" onclick="startTimer()">START</button>
                     <button class="timer-btn btn-gaming btn-warning hidden" id="timerPauseBtn" onclick="pauseTimer()">PAUSE</button>
                     <button class="timer-btn btn-gaming btn-danger" onclick="resetTimer()">RESET</button>
                 </div>
-                
-                <div class="timer-progress" style="width: 100%; height: 10px; background: rgba(0,0,0,0.3); border-radius: 5px; overflow: hidden;">
+                <div class="timer-progress" style="width: 100%; height: 10px; background: rgba(0,0,0,0.3); border-radius: 5px; overflow: hidden; margin-top: 20px;">
                     <div id="timerProgress" style="width: 0%; height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); transition: width 1s linear;"></div>
                 </div>
-                
                 <div style="margin-top: 20px; text-align: center; color: var(--text-muted);">
-                    <p>Study: 40min → Break: 10min (2x) → Long Break: 20min</p>
+                    <p id="timerModeInfo">Study: 40min → Break: 10min</p>
                 </div>
             </div>
         </div>
@@ -1216,25 +512,19 @@
         <div id="stopwatchScreen" class="feature-section">
             <div class="section-header">
                 <h2 class="section-title">⏲️ STUDY STOPWATCH</h2>
-                <button class="back-btn" onclick="goHome()">← Back to Home</button>
+                <button class="back-btn" onclick="goHome()">← Back</button>
             </div>
-            
             <div class="timer-container">
                 <div class="subject-selector">
                     <label>Select Subject</label>
-                    <select id="stopwatchSubject" class="subject-dropdown">
-                        <option value="">Choose a subject...</option>
-                    </select>
+                    <select id="StopwatchSubject" class="subject-dropdown"><option value="">Choose subject...</option></select>
                 </div>
-                
                 <div class="timer-display" id="stopwatchDisplay">00:00:00</div>
-                
                 <div class="timer-controls">
                     <button class="timer-btn btn-gaming btn-accent" id="swStartBtn" onclick="startStopwatch()">START</button>
                     <button class="timer-btn btn-gaming btn-warning hidden" id="swPauseBtn" onclick="pauseStopwatch()">PAUSE</button>
                     <button class="timer-btn btn-gaming btn-danger" onclick="stopStopwatch()">STOP & SAVE</button>
                 </div>
-                
                 <div id="stopwatchLaps" style="margin-top: 30px; max-height: 300px; overflow-y: auto;"></div>
             </div>
         </div>
@@ -1243,34 +533,32 @@
         <div id="targetsScreen" class="feature-section">
             <div class="section-header">
                 <h2 class="section-title">🎯 DAILY TARGETS</h2>
-                <button class="back-btn" onclick="goHome()">← Back to Home</button>
+                <button class="back-btn" onclick="goHome()">← Back</button>
             </div>
-            
-            <div class="targets-container">
+            <div class="Targets-container">
                 <div class="add-target-form">
-                    <input type="text" id="newTargetInput" class="target-input" placeholder="Add a new target...">
+                    <input type="text" id="newTargetInput" class="Target-input" placeholder="Add a new target...">
                     <button class="btn-gaming" style="width: auto;" onclick="addTarget()">Add</button>
                 </div>
-                
-                <div class="target-list" id="targetsList"></div>
+                <div class="Target-list" id="TargetsList"></div>
             </div>
         </div>
 
-        <!-- CALENDAR -->
+        <!-- CALENDAR - FIXED -->
         <div id="calendarScreen" class="feature-section">
             <div class="section-header">
                 <h2 class="section-title">📅 STUDY CALENDAR</h2>
-                <button class="back-btn" onclick="goHome()">← Back to Home</button>
+                <button class="back-btn" onclick="goHome()">← Back</button>
             </div>
-            
-            <div class="calendar-container">
+            <div class="calendar-wrapper">
                 <div class="calendar-header">
                     <button class="calendar-nav" onclick="changeMonth(-1)">◀</button>
                     <div class="calendar-month" id="calendarMonth">Month Year</div>
                     <button class="calendar-nav" onclick="changeMonth(1)">▶</button>
                 </div>
-                
-                <div class="calendar-grid" id="calendarGrid"></div>
+                <div class="calendar-grid-container" id="calendarGrid">
+                    <!-- Calendar grid will be generated here -->
+                </div>
             </div>
         </div>
 
@@ -1278,45 +566,30 @@
         <div id="marksScreen" class="feature-section">
             <div class="section-header">
                 <h2 class="section-title">📝 ACADEMIC MARKS</h2>
-                <button class="back-btn" onclick="goHome()">← Back to Home</button>
+                <button class="back-btn" onclick="goHome()">← Back</button>
             </div>
-            
             <div class="marks-container">
                 <div class="marks-sidebar">
                     <h3 style="color: var(--primary); margin-bottom: 15px;">Categories</h3>
                     <div class="category-list" id="marksCategories">
-                        <div class="category-item active" onclick="selectCategory('all')">
-                            <span>All Marks</span>
-                            <span id="countAll">0</span>
-                        </div>
+                        <div class="category-item active" onclick="selectCategory('all')"><span>All Marks</span><span id="countAll">0</span></div>
                     </div>
-                    
-                    <div class="add-category-form">
+                    <div class="add-category-form" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(0, 212, 255, 0.2);">
                         <div class="input-group">
                             <label>New Category</label>
                             <input type="text" id="newCategoryName" class="input-field" placeholder="e.g., Term Test">
                         </div>
-                        <button class="btn-gaming" onclick="addCategory()" style="margin-top: 10px;">Add Category</button>
+ <button class="btn-gaming" onclick="addCategory()" style="margin-top: 10px;">Add Category</button>
                     </div>
                 </div>
-                
                 <div class="marks-main">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <div class="marks-header">
                         <h3 id="currentCategoryTitle" style="color: var(--primary);">All Marks</h3>
                         <button class="btn-gaming" onclick="openAddMarkModal()">+ Add Paper</button>
                     </div>
-                    
                     <div id="marksContent">
                         <table class="marks-table" id="marksTable">
-                            <thead>
-                                <tr>
-                                    <th>Paper No</th>
-                                    <th>Subject</th>
-                                    <th>Marks</th>
-                                    <th>Date</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
+                            <thead><tr><th>Paper</th><th>Subject</th><th>Marks</th><th>Date</th><th>Actions</th></tr></thead>
                             <tbody id="marksTableBody"></tbody>
                         </table>
                     </div>
@@ -1328,177 +601,101 @@
         <div id="analyticsScreen" class="feature-section">
             <div class="section-header">
                 <h2 class="section-title">📊 ANALYTICS</h2>
-                <button class="back-btn" onclick="goHome()">← Back to Home</button>
+                <button class="back-btn" onclick="goHome()">← Back</button>
             </div>
-            
             <div class="analytics-container">
                 <div class="analytics-sidebar">
-    <div class="analytics-menu">
-        <div class="analytics-item active" onclick="selectAnalyticsType('marks')">
-            <div style="font-weight: 600;">📈 Marks Analysis</div>
-            <div style="font-size: 0.85rem; color: var(--text-muted);">Track academic progress</div>
-        </div>
-        <div class="analytics-item" onclick="selectAnalyticsType('study')">
-            <div style="font-weight: 600;">⏱️ Study Time Analysis</div>
-            <div style="font-size: 0.85rem; color: var(--text-muted);">Visualize study habits</div>
-        </div>
-    </div>
-</div>
-                
-                <div class="analytics-main">
-                    <!-- Marks Analytics -->
-                    <div id="marksAnalytics">
-                        <div style="margin-bottom: 20px;">
-                            <label style="color: var(--primary); display: block; margin-bottom: 10px;">Select Category</label>
-                            <select id="analyticsCategory" class="subject-dropdown" onchange="updateMarksChart()">
-                                <option value="all">Overall (All Categories)</option>
-                            </select>
+                    <div class="analytics-menu">
+                        <div class="analytics-item active" onclick="selectAnalyticsType('marks')">
+                            <div style="font-weight: 600;">📈 Marks Analysis</div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted);">Track academic progress</div>
                         </div>
-                        <div class="chart-container">
-                            <canvas id="marksChart"></canvas>
+                        <div class="analytics-item" onclick="selectAnalyticsType('study')">
+                            <div style="font-weight: 600;">⏱️ Study Time Analysis</div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted);">Visualize study habits</div>
                         </div>
                     </div>
-                    
-                    <!-- Study Time Analytics -->
-                    <!-- Study Time Analytics -->
-<div id="studyAnalytics" class="hidden">
-    <div style="margin-bottom: 20px;">
-        <label style="color: var(--primary); display: block; margin-bottom: 10px;">Select Subject</label>
-        <select id="studySubjectFilter" class="subject-dropdown" onchange="updateStudyChart()">
-            <option value="all">Overall (All Subjects)</option>
-        </select>
-    </div>
-    
-    <div class="time-filter">
-        <button class="filter-btn active" onclick="setTimeFilter('week')">Last Week</button>
-        <button class="filter-btn" onclick="setTimeFilter('month')">Last Month</button>
-        <button class="filter-btn" onclick="setTimeFilter('3months')">Last 3 Months</button>
-        <button class="filter-btn" onclick="setTimeFilter('year')">Last Year</button>
-        <button class="filter-btn" onclick="setTimeFilter('all')">All Time</button>
-    </div>
-    
-    <div class="chart-container">
-        <canvas id="studyChart"></canvas>
-    </div>
-    
-    <div id="studyStats" style="margin-top: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
-        <div class="stat-card">
-            <div class="stat-value" id="totalStudySessions">0</div>
-            <div class="stat-label">Total Sessions</div>
-        </div>
-        <div class="stat-card">
-                <div class="stat-value" id="totalStudyMinutes">0</div>
-                <div class="stat-label">Total Minutes</div>
-                </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="avgStudyTime">0</div>
-                            <div class="stat-label">Avg Per Day</div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="analytics-main" id="analyticsMain">
+                    <!-- Dynamic content based on selection -->
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- PROFILE MODAL -->
-    <div id="profileModal" class="modal-overlay" onclick="closeProfile(event)">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <button class="modal-close" onclick="closeProfile()">×</button>
-            <div class="profile-display">
-                <img id="modalAvatar" class="profile-avatar-large" alt="Profile">
-                <h2 id="modalName" style="margin-bottom: 20px;"></h2>
-                
-                <div class="profile-field">
-                    <div class="profile-label">Stream</div>
-                    <div class="profile-value" id="modalStream"></div>
-                </div>
-                
-                <div class="profile-field">
-                    <div class="profile-label">Birthday</div>
-                    <div class="profile-value" id="modalBirthday"></div>
-                </div>
-                
-                <div class="profile-field">
-                    <div class="profile-label">Email</div>
-                    <div class="profile-value" id="modalEmail"></div>
-                </div>
-                
-                <div class="profile-field">
-                    <div class="profile-label">School</div>
-                    <div class="profile-value" id="modalSchool"></div>
-                </div>
-                
-                <div class="profile-field">
-                    <div class="profile-label">Total Study Time</div>
-                    <div class="profile-value" id="modalStudyTime"></div>
-                </div>
-                
-                <div class="profile-field">
-                    <div class="profile-label">Current Streak</div>
-                    <div class="profile-value" id="modalStreak"></div>
+        <!-- PROFILE MODAL -->
+        <div id="profileModal" class="modal-overlay" onclick="closeProfile(event)">
+            <div class="modal-content" onclick="event.stopPropagation()">
+                <button class="modal-close" onclick="closeProfile()">×</button>
+                <div class="profile-display">
+                    <img id="modalAvatar" class="profile-avatar-large" alt="Profile">
+                    <h2 id="ModalName" style="margin-bottom: 20px;"></h2>
+                    <div class="profile-field"><div class="profile-label">Stream</div><div class="profile-value" id="ModalStream"></div></div>
+                    <div class="profile-field"><div class="profile-label">Email</div><div class="profile-value" id="ModalEmail"></div></div>
+                    <div class="profile-field"><div class="profile-label">Total Study Time</div><div class="profile-value" id="ModalStudyTime"></div></div>
+                    <div class="profile-field"><div class="profile-label">Current Streak</div><div class="profile-value" id="ModalStreak"></div></div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- ADD MARK MODAL -->
-    <div id="addMarkModal" class="modal-overlay" onclick="closeMarkModal(event)">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <button class="modal-close" onclick="closeMarkModal()">×</button>
-            <h2 class="logo-title" style="font-size: 1.5rem; margin-bottom: 20px;">ADD NEW PAPER</h2>
-            
-            <div class="input-group">
-                <label>Category</label>
-                <select id="markCategory" class="input-field"></select>
+        <!-- ADD MARK MODAL -->
+        <div id="addMarkModal" class="modal-overlay" onclick="closeMarkModal(event)">
+            <div class="modal-content" onclick="event.stopPropagation()">
+                <button class="modal-close" onclick="closeMarkModal()">×</button>
+                <h2 class="logo-title" style="font-size: 1.5rem; margin-bottom: 20px;">ADD NEW PAPER</h2>
+                <div class="input-group">
+                    <label>Category</label>
+                    <select id="MarkCategory" class="input-field"></select>
+                </div>
+                <div class="input-group">
+                    <label>Paper Name</label>
+                    <input type="text" id="MarkPaperNo" class="input-field" placeholder="e.g., Paper 1">
+                </div>
+ <div class="input-group">
+                    <label>Subject</label>
+                    <select id="MarkSubject" class="input-field"></select>
+                </div>
+                <div class="input-group">
+                    <label>Marks (%)</label>
+                    <input type="number" id="MarkScore" class="input-field" placeholder="0-100" min="0" max="100">
+                </div>
+                <div class="input-group">
+                    <label>Date</label>
+                    <input type="date" id="MarkDate" class="input-field">
+                </div>
+                <button class="btn-gaming" onclick="saveMark()">Save Mark</button>
             </div>
-            
-            <div class="input-group">
-                <label>Paper Number</label>
-                <input type="text" id="markPaperNo" class="input-field" placeholder="e.g., Paper 1">
-            </div>
-            
-            <div class="input-group">
-                <label>Subject</label>
-                <select id="markSubject" class="input-field"></select>
-            </div>
-            
-            <div class="input-group">
-                <label>Marks (%)</label>
-                <input type="number" id="markScore" class="input-field" placeholder="0-100" min="0" max="100">
-            </div>
-            
-            <div class="input-group">
-                <label>Date</label>
-                <input type="date" id="markDate" class="input-field">
-            </div>
-            
-            <button class="btn-gaming" onclick="saveMark()">Save Mark</button>
         </div>
-    </div>
 
-    <!-- DAY DETAIL MODAL -->
-    <div id="dayModal" class="modal-overlay" onclick="closeDayModal(event)">
-        <div class="modal-content day-detail-content" onclick="event.stopPropagation()">
-            <button class="modal-close" onclick="closeDayModal()">×</button>
-            <h2 class="logo-title" style="font-size: 1.5rem; margin-bottom: 20px;" id="dayModalTitle">Day Details</h2>
-            <div id="dayModalContent"></div>
+        <!-- DAY DETAIL MODAL -->
+        <div id="dayModal" class="modal-overlay" onclick="closeDayModal(event)">
+            <div class="modal-content day-detail-content" onclick="event.stopPropagation()">
+                <button class="modal-close" onclick="closeDayModal()">×</button>
+                <h2 class="logo-title" style="font-size: 1.5rem; margin-bottom: 20px;" id="dayModalTitle">Day Details</h2>
+                <div id="dayModalContent"></div>
+            </div>
         </div>
     </div>
 
     <script>
-        // ==================== USER MANAGEMENT ====================
-        const USERS = {
-            '2008': { password: '12345', name: 'User Alpha', id: 'user1' },
-            '2009': { password: '12345', name: 'User Beta', id: 'user2' },
-            '2010': { password: '12345', name: 'User Gamma', id: 'user3' }
+        // ==================== FIREBASE CONFIG ====================
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "your-project.firebaseapp.com",
+            projectId: "your-project-id",
+            storageBucket: "your-project.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef123456"
         };
-
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+        
+        // ==================== GLOBAL STATE ====================
         let currentUser = null;
         let currentUserData = null;
-        let currentCode = null;
-
-        // ==================== STATE MANAGEMENT ====================
+        let currentUserDocRef = null;
+        
         let timerInterval = null;
         let stopwatchInterval = null;
         let timerTimeLeft = 40 * 60;
@@ -1515,62 +712,179 @@
         
         let marksChartInstance = null;
         let studyChartInstance = null;
+        let pendingSync = false;
 
         // ==================== INITIALIZATION ====================
         document.addEventListener('DOMContentLoaded', function() {
             // Set today's date for mark input
-            document.getElementById('markDate').valueAsDate = new Date();
+            const today = new Date();
+            document.getElementById('MarkDate').valueAsDate = today;
+            
+            // Check if user is already logged in
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    currentUser = user;
+                    loadUserData();
+                } else {
+                    showScreen('loginScreen');
+                }
+            });
         });
 
         // ==================== AUTHENTICATION ====================
-        function handleLogin() {
-            const code = document.getElementById('loginCode').value;
+        async function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
             const errorDiv = document.getElementById('loginError');
             
-            if (!USERS[code]) {
-                errorDiv.textContent = 'Invalid access code!';
+            showLoading(true);
+            
+            try {
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                currentUser = userCredential.user;
+                await loadUserData();
+            } catch (error) {
+                showLoading(false);
+                errorDiv.textContent = getErrorMessage(error.code);
+            }
+        }
+        
+        async function register() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const errorDiv = document.getElementById('loginError');
+            
+            if (!email || !password) {
+                errorDiv.textContent = 'Please fill in all fields';
                 return;
             }
             
-            if (USERS[code].password !== password) {
-                errorDiv.textContent = 'Invalid password!';
-                return;
+            showLoading(true);
+            
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                currentUser = userCredential.user;
+                
+                // Create initial user data
+                const initialData = {
+                    profile: {
+                        name: email.split('@')[0],
+                        email: email,
+                        photo: 'https://ui-avatars.com/api/?name=' + encodeURIComponent(email.split('@')[0]) + '&background=0d4ff&color=fff',
+                        stream: 'Science',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    },
+                    subjects: [
+                        { id: 'sub1', name: 'Mathematics', totalTime: 0 },
+                        { id: 'sub2', name: 'Physics', totalTime: 0 },
+                        { id: 'sub3', name: 'Chemistry', totalTime: 0 }
+                    ],
+                    Targets: [],
+                    marks: {},
+                    studyLog: {},
+                    totalStudyTime: 0,
+                    currentStreak: 0,
+                    lastStudyDate: null
+                };
+                
+                await db.collection('users').doc(currentUser.uid).set(initialData);
+                await LoadUserData();
+                
+            } catch (error) {
+                showLoading(false);
+                errorDiv.textContent = getErrorMessage(error.code);
             }
-            
-            currentCode = code;
-            currentUser = USERS[code];
-            
-            // Check if user has data
-            const savedData = localStorage.getItem(`studyTracker_${currentUser.id}`);
-            
-            if (!savedData) {
-                // First time user - show profile setup
-                showScreen('profileSetupScreen');
-            } else {
-                // Returning user - load data
-                currentUserData = JSON.parse(savedData);
-                showApp();
+        }
+        
+        function getErrorMessage(code) {
+            const messages = {
+                'auth/user-not-found': 'User not found. Please register first.',
+                'auth/wrong-password': 'Incorrect password.',
+                'auth/invalid-email': 'Invalid email format.',
+                'auth/weak-password': 'Password should be at least 6 characters.',
+                'auth/email-already-in-use': 'Email already registered.'
+            };
+            return messages[code] || 'An error occurred. Please try again.';
+        }
+        
+        async function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                await auth.signOut();
+                currentUser = null;
+                currentUserData = null;
+                currentUserDocRef = null;
+                location.reload();
             }
         }
 
-        function logout() {
-            if (confirm('Are you sure you want to logout?')) {
-                currentUser = null;
-                currentUserData = null;
-                currentCode = null;
-                location.reload();
+        // ==================== DATA MANAGEMENT ====================
+        async function LoadUserData() {
+            if (!currentUser) return;
+            
+            showLoading(true);
+            showSyncStatus('syncing');
+            
+            try {
+                const doc = await db.collection('users').doc(currentUser.uid).get();
+                
+                if (doc.exists) {
+                    currentUserData = doc.data();
+                    currentUserDocRef = doc.ref;
+                    
+                    // Ensure all required fields exist
+                    if (!currentUserData.Subjects) currentUserData.Subjects = [];
+                    if (!currentUserData.Targets) currentUserData.Targets = [];
+                    if (!currentUserData.marks) currentUserData.marks = {};
+                    if (!currentUserData.studyLog) currentUserData.studyLog = {};
+                    
+                    showApp();
+                } else {
+                    // New user - create profile
+                    showScreen('profileSetupScreen');
+                }
+                
+                showLoading(false);
+                showSyncStatus('synced');
+                setTimeout(() => hideSyncStatus(), 2000);
+                
+            } catch (error) {
+                showLoading(false);
+                console.error('Error loading data:', error);
+                alert('Error loading your data. Please refresh.');
+            }
+        }
+        
+        async function saveUserData() {
+            if (!currentUser || !currentUserDocRef) return;
+            
+            showSyncStatus('syncing');
+            pendingSync = true;
+            
+            try {
+                await currentUserDocRef.update({
+                    ...currentUserData,
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                showSyncStatus('synced');
+                pendingSync = false;
+                setTimeout(() => HideSyncStatus(), 2000);
+                
+            } catch (error) {
+                console.error('Error saving:', error);
+                showSyncStatus('error');
+                pendingSync = false;
             }
         }
 
         // ==================== PROFILE SETUP ====================
         let tempProfilePhoto = null;
-
+        
         function handlePhotoUpload(event) {
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = async function(e) {
                     tempProfilePhoto = e.target.result;
                     document.getElementById('previewPhoto').src = e.target.result;
                     document.getElementById('previewPhoto').classList.remove('hidden');
@@ -1579,586 +893,534 @@
                 reader.readAsDataURL(file);
             }
         }
-
-        function goToStreamSelection() {
+        
+        async function completeProfileSetup() {
             const name = document.getElementById('setupName').value;
-            const birthday = document.getElementById('setupBirthday').value;
-            const email = document.getElementById('setupEmail').value;
-            const school = document.getElementById('setupSchool').value;
+            const stream = document.getElementById('SetupStream').value;
+            const photo = tempProfilePhoto || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(name) + '&background=0d4ff&color=fff';
             
-            if (!name || !birthday || !email || !school) {
+            if (!name || !stream) {
                 alert('Please fill in all fields!');
                 return;
             }
             
-            // Store temp profile data
-            currentUserData = {
-                profile: {
-                    name: name,
-                    birthday: birthday,
-                    email: email,
-                    school: school,
-                    photo: tempProfilePhoto || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">👤</text></svg>'
-                },
-                stream: '',
-                subjects: [],
-                targets: [],
-                marks: {},
-                studyLog: {},
-                totalStudyTime: 0,
-                currentStreak: 0,
-                lastStudyDate: null
-            };
+            showLoading(true);
             
-            showScreen('streamScreen');
+            try {
+                const updateData = {
+                    'profile.name': name,
+                    'profile.stream': stream,
+                    'profile.photo': photo,
+                    'profile.setupComplete': true
+                };
+                
+                await currentUserDocRef.update(updateData);
+                await LoadUserData();
+                
+            } catch (error) {
+                showLoading(false);
+                alert('Error saving profile. Please try again.');
+            }
         }
-
-        function selectStream(stream) {
-            currentUserData.stream = stream;
-            showScreen('subjectSetupScreen');
-        }
-
-        function completeSetup() {
-    const subjectInputs = document.querySelectorAll('.setup-subject');
-    const subjects = [];
-    
-    subjectInputs.forEach(input => {
-        if (input.value.trim()) {
-            subjects.push({
-                id: Date.now() + Math.random(),
-                name: input.value.trim(),
-                totalTime: 0
-            });
-        }
-    });
-    
-    if (subjects.length === 0) {
-        alert('Please add at least one subject!');
-        return;
-    }
-    
-    currentUserData.subjects = subjects;
-    
-    // Create default targets based on subjects
-    currentUserData.targets = subjects.map((sub, idx) => ({
-        id: Date.now() + idx,
-        title: `Study ${sub.name} for 1 hour`,
-        completed: false,
-        subject: sub.name
-    }));
-    
-    // Save to localStorage
-    localStorage.setItem(`studyTracker_${currentUser.id}`, JSON.stringify(currentUserData));
-    
-    // Hide setup screen and show app
-    document.getElementById('subjectSetupScreen').classList.remove('active');
-    showApp();
-}
 
         // ==================== SCREEN MANAGEMENT ====================
         function showScreen(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(screenId).classList.add('active');
         }
-
+        
         function showApp() {
-    // Hide all setup screens
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    
-    // Show app container
-    document.getElementById('appContainer').classList.add('active');
-    document.getElementById('appContainer').style.display = 'block';
-    
-    // Update header
-    document.getElementById('headerName').textContent = currentUserData.profile.name;
-    document.getElementById('headerStream').textContent = currentUserData.stream.toUpperCase();
-    document.getElementById('headerAvatar').src = currentUserData.profile.photo;
-    
-    // Populate subject dropdowns
-    populateSubjectDropdowns();
-    
-    // Update home stats
-    updateHomeStats();
-    
-    // Show home screen
-    document.querySelectorAll('.feature-section').forEach(f => f.classList.remove('active'));
-    document.getElementById('homeScreen').classList.add('active');
-}
-
-        function showFeature(feature) {
-    // Hide all features
-    document.querySelectorAll('.feature-section').forEach(f => {
-        f.classList.remove('active');
-        f.style.display = 'none';
-    });
-    
-    // Show selected feature
-    if (feature === 'home') {
-        const homeScreen = document.getElementById('homeScreen');
-        homeScreen.style.display = 'block';
-        homeScreen.classList.add('active');
-        updateHomeStats();
-    }
-    // ... rest of conditions (add style.display = 'block' to each)
-    else if (feature === 'timer') {
-        const screen = document.getElementById('timerScreen');
-        screen.style.display = 'block';
-        screen.classList.add('active');
-    }
-    else if (feature === 'stopwatch') {
-        const screen = document.getElementById('stopwatchScreen');
-        screen.style.display = 'block';
-        screen.classList.add('active');
-    }
-    else if (feature === 'targets') {
-        const screen = document.getElementById('targetsScreen');
-        screen.style.display = 'block';
-        screen.classList.add('active');
-        renderTargets();
-    }
-    else if (feature === 'calendar') {
-        const screen = document.getElementById('calendarScreen');
-        screen.style.display = 'block';
-        screen.classList.add('active');
-        generateCalendar();
-    }
-    else if (feature === 'marks') {
-        const screen = document.getElementById('marksScreen');
-        screen.style.display = 'block';
-        screen.classList.add('active');
-        renderMarksCategories();
-        renderMarks();
-    }
-    else if (feature === 'analytics') {
-        const screen = document.getElementById('analyticsScreen');
-        screen.style.display = 'block';
-        screen.classList.add('active');
-        initAnalytics();
-    }
-}
-
-        function goHome() {
-    // Stop any active timers
-    pauseTimer();
-    pauseStopwatch();
-    
-    // Hide all feature sections
-    document.querySelectorAll('.feature-section').forEach(f => {
-        f.classList.remove('active');
-        f.style.display = 'none';
-    });
-    
-    // Show home
-    const homeScreen = document.getElementById('homeScreen');
-    homeScreen.style.display = 'block';
-    homeScreen.classList.add('active');
-    updateHomeStats();
-}
-
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('appContainer').classList.add('active');
+            document.getElementById('appContainer').style.display = 'block';
+            
+            // Update Header
+            updateHeaderInfo();
+            
+            // Populate dropdowns
+            populateSubjectDropdowns();
+            
+            // Update Home Stats
+            updateHomeStats();
+            
+            // Show home screen
+            showScreen('homeScreen');
+        }
+        
+        function updateHeaderInfo() {
+            if (!currentUserData) return;
+            
+            document.getElementById('headerName').textContent = currentUserData.profile.name;
+            document.getElementById('headerStream').textContent = currentUserData.profile.stream;
+            document.getElementById('headerAvatar').src = currentUserData.profile.photo;
+        }
+        
         function populateSubjectDropdowns() {
-    const timerSelect = document.getElementById('timerSubject');
-    const stopwatchSelect = document.getElementById('stopwatchSubject');
-    const markSelect = document.getElementById('markSubject');
-    const studyFilter = document.getElementById('studySubjectFilter');
-    
-    const options = currentUserData.subjects.map(s => 
-        `<option value="${s.name}">${s.name}</option>`
-    ).join('');
-    
-    timerSelect.innerHTML = '<option value="">Choose a subject...</option>' + options;
-    stopwatchSelect.innerHTML = '<option value="">Choose a subject...</option>' + options;
-    markSelect.innerHTML = options;
-    
-    // Populate study analytics filter
-    if (studyFilter) {
-        studyFilter.innerHTML = '<option value="all">Overall (All Subjects)</option>' + options;
-    }
-}
-
-        function updateHomeStats() {
-            const today = new Date().toDateString();
-            const todayData = currentUserData.studyLog[today];
-            const pendingTargets = currentUserData.targets.filter(t => !t.completed).length;
+            if (!currentUserData || !currentUserData.Subjects) return;
             
-            document.getElementById('homeTargetsCount').textContent = 
-                pendingTargets > 0 ? `${pendingTargets} pending targets` : 'All targets completed!';
-        }
-
-        // ==================== PROFILE MODAL ====================
-        function openProfile() {
-            document.getElementById('modalAvatar').src = currentUserData.profile.photo;
-            document.getElementById('modalName').textContent = currentUserData.profile.name;
-            document.getElementById('modalStream').textContent = currentUserData.stream.toUpperCase();
-            document.getElementById('modalBirthday').textContent = currentUserData.profile.birthday;
-            document.getElementById('modalEmail').textContent = currentUserData.profile.email;
-            document.getElementById('modalSchool').textContent = currentUserData.profile.school;
-            document.getElementById('modalStudyTime').textContent = 
-                `${Math.floor(currentUserData.totalStudyTime / 60)}h ${currentUserData.totalStudyTime % 60}m`;
-            document.getElementById('modalStreak').textContent = `${currentUserData.currentStreak} days`;
+            const options = currentUserData.Subjects.map(s => 
+                `<option value="${s.id}">${s.name}</option>`
+            ).join('');
             
-            document.getElementById('profileModal').classList.add('active');
+            ['TimerSubject', 'StopwatchSubject', 'MarkSubject', 'analyticsSubject'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.innerHTML = '<option value="">Choose subject...</option>' + options;
+                }
+            });
         }
-
-        function closeProfile(event) {
-            if (!event || event.target.id === 'profileModal' || event.target.classList.contains('modal-close')) {
-                document.getElementById('profileModal').classList.remove('active');
+        
+        function showFeature(feature) {
+            document.querySelectorAll('.feature-section').forEach(f => {
+                f.classList.remove('active');
+                f.style.display = 'none';
+            });
+            
+            const screenMap = {
+                'home': 'homeScreen',
+                'timer': 'timerScreen',
+                'stopwatch': 'stopwatchScreen',
+                'targets': 'targetsScreen',
+                'calendar': 'calendarScreen',
+                'marks': 'marksScreen',
+                'analytics': 'analyticsScreen'
+            };
+            
+            if (screenMap[feature]) {
+                const screen = document.getElementById(screenMap[feature]);
+                screen.style.display = 'block';
+                screen.classList.add('active');
+                
+                // Initialize feature-specific content
+                if (feature === 'targets') renderTargets();
+                if (feature === 'calendar') generateCalendar();
+                If (feature === 'marks') {
+                    renderMarksCategories();
+                    RenderMarks();
+                }
+                If (feature === 'analytics') {
+                    InitAnalytics();
+                }
             }
+        }
+        
+        function goHome() {
+            pauseTimer();
+            pauseStopwatch();
+            
+            document.querySelectorAll('.feature-section').forEach(f => {
+                f.classList.remove('active');
+                f.style.display = 'none';
+            });
+            
+            showScreen('homeScreen');
+            updateHomeStats();
         }
 
         // ==================== TIMER ====================
         function setTimerMode(mode) {
             currentTimerMode = mode;
             document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
             
-            if (mode === 'pomodoro') timerTimeLeft = 40 * 60;
-            else if (mode === 'short') timerTimeLeft = 25 * 60;
-            else if (mode === 'long') timerTimeLeft = 60 * 60;
+            // Find the button that was clicked and activate it
+            const buttons = document.querySelectorAll('.mode-btn');
+            buttons.forEach(btn => {
+                if (btn.textContent.toLowerCase().includes(mode)) {
+                    btn.classList.add('active');
+                }
+            });
             
+            const times = {
+                'pomodoro': 40 * 60,
+                'short': 25 * 60,
+                'long': 60 * 60,
+                'custom': 30 * 60
+            };
+            
+            timerTimeLeft = times[mode] || 30 * 60;
             updateTimerDisplay();
+            UpdateTimerModeInfo();
         }
-
+        
+        function UpdateTimerModeInfo() {
+            const info = document.getElementById('timerModeInfo');
+            const messages = {
+                'pomodoro': 'Study: 40min → Break: 10min (2x) → Long Break: 20min',
+                'short': 'Study: 25min → Break: 5min',
+                'long': 'Study: 60min → Break: 15min',
+                'custom': 'Custom timer duration'
+            };
+            info.textContent = messages[currentTimerMode] || messages['custom'];
+        }
+        
         function updateTimerDisplay() {
-            const minutes = Math.floor(timerTimeLeft / 60);
-            const seconds = timerTimeLeft % 60;
-            document.getElementById('timerDisplay').textContent = 
-                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        }
-
-        function updateTimerProgress() {
-            let totalTime;
-            if (currentTimerMode === 'pomodoro') totalTime = 40 * 60;
-            else if (currentTimerMode === 'short') totalTime = 25 * 60;
-            else totalTime = 60 * 60;
+            const hours = Math.floor(timerTimeLeft / 3600);
+            const minutes = Math.floor((timerTimeLeft % 3600) / 60);
+            const Seconds = timerTimeLeft % 60;
             
-            const progress = ((totalTime - timerTimeLeft) / totalTime) * 100;
+            let display = '';
+            if (hours > 0) display += `${hours.toString().padStart(2, '0')}:`;
+            display += `${Minutes.toString().padStart(2, '0')}:${Seconds.toString().padStart(2, '0')}`;
+            
+            document.getElementById('timerDisplay').textContent = display;
+        }
+        
+        function UpdateTimerProgress() {
+            let totalTime;
+            switch(currentTimerMode) {
+                case 'pomodoro': totalTime = 40 * 60; break;
+                case 'short': totalTime = 25 * 60; break;
+                case 'Long': totalTime = 60 * 60; break;
+                default: totalTime = timerTimeLeft;
+            }
+            
+            const progress = Math.max(0, Math.min(100, ((totalTime - timerTimeLeft) / totalTime) * 100));
             document.getElementById('timerProgress').style.width = progress + '%';
         }
-
-        function startTimer() {
-            const subject = document.getElementById('timerSubject').value;
-            if (!subject) {
+        
+        async function startTimer() {
+            const subjectSelect = document.getElementById('TimerSubject');
+            const subjectId = subjectSelect.value;
+            const subjectName = subjectSelect.options[subjectSelect.selectedIndex].text;
+            
+            if (!subjectId) {
                 alert('Please select a subject first!');
                 return;
             }
             
             document.getElementById('timerStartBtn').classList.add('hidden');
-            document.getElementById('timerPauseBtn').classList.remove('hidden');
+            document.getElementById('TimerPauseBtn').classList.remove('hidden');
             
-            timerInterval = setInterval(() => {
+            // Record start Time
+            const startTime = Date.now();
+            
+            TimerInterval = setInterval(() => {
                 if (timerTimeLeft > 0) {
-                    timerTimeLeft--;
-                    updateTimerDisplay();
-                    updateTimerProgress();
+                    TimerTimeLeft--;
+                    UpdateTimerDisplay();
+                    UpdateTimerProgress();
                 } else {
-                    completeTimerSession(subject);
+                    clearInterval(TimerInterval);
+                    CompleteTimerSession(subjectId, subjectName, startTime);
                 }
             }, 1000);
         }
-
+        
         function pauseTimer() {
-            clearInterval(timerInterval);
-            document.getElementById('timerStartBtn').classList.remove('hidden');
-            document.getElementById('timerPauseBtn').classList.add('hidden');
+            clearInterval(TimerInterval);
+            document.getElementById('TimerStartBtn').classList.remove('hidden');
+            document.getElementById('TimerPauseBtn').classList.add('hidden');
         }
-
+        
         function resetTimer() {
             pauseTimer();
-            if (currentTimerMode === 'pomodoro') timerTimeLeft = 40 * 60;
-            else if (currentTimerMode === 'short') timerTimeLeft = 25 * 60;
-            else timerTimeLeft = 60 * 60;
-            updateTimerDisplay();
-            document.getElementById('timerProgress').style.width = '0%';
+            const times = {
+                'pomodoro': 40 * 60,
+                'short': 25 * 60,
+                'Long': 60 * 60,
+                'custom': 30 * 60
+            };
+            
+            timerTimeLeft = times[currentTimerMode] || 30 * 60;
+            UpdateTimerDisplay();
+            document.getElementById('TimerProgress').style.width = '0%';
         }
-
-        function completeTimerSession(subject) {
-            clearInterval(timerInterval);
+        
+        async function CompleteTimerSession(subjectId, subjectName, startTime) {
+            const endTime = Date.now();
+            const durationMinutes = Math.floor((endTime - startTime) / 60000);
             
+            // Log Study Session
             const today = new Date().toDateString();
-            const sessionMinutes = currentTimerMode === 'pomodoro' ? 40 : 
-                                  currentTimerMode === 'short' ? 25 : 60;
             
-            // Log study time
             if (!currentUserData.studyLog[today]) {
                 currentUserData.studyLog[today] = { sessions: 0, minutes: 0, subjects: [] };
             }
-            currentUserData.studyLog[today].sessions++;
-            currentUserData.studyLog[today].minutes += sessionMinutes;
-            if (!currentUserData.studyLog[today].subjects.includes(subject)) {
-                currentUserData.studyLog[today].subjects.push(subject);
+            
+            CurrentUserData.studyLog[today].sessions++;
+            CurrentUserData.studyLog[today].minutes += durationMinutes;
+            
+            if (!CurrentUserData.studyLog[today].subjects.includes(subjectName)) {
+                CurrentUserData.studyLog[today].subjects.push(subjectName);
             }
             
-            // Update subject time
-            const subj = currentUserData.subjects.find(s => s.name === subject);
-            if (subj) subj.totalTime += sessionMinutes;
+            // Update Subject Total Time
+            const subject = CurrentUserData.Subjects.find(s => s.id === subjectId);
+            If (subject) {
+                subject.totalTime += DurationMinutes;
+            }
             
-            // Update streak
-            updateStreak();
+            // Update Streak
+            UpdateStreak();
             
-            currentUserData.totalStudyTime += sessionMinutes;
-            saveUserData();
+            CurrentUserData.totalStudyTime += DurationMinutes;
             
-            alert(`Session complete! ${sessionMinutes} minutes logged for ${subject}`);
-            resetTimer();
+            await saveUserData();
+            
+            Alert(`Session complete! ${durationMinutes} minutes logged for ${subjectName}`);
+            ResetTimer();
         }
 
         // ==================== STOPWATCH ====================
-        function updateStopwatchDisplay() {
+        function UpdateStopwatchDisplay() {
             const hours = Math.floor(stopwatchTime / 3600);
             const minutes = Math.floor((stopwatchTime % 3600) / 60);
-            const seconds = stopwatchTime % 60;
+            const Seconds = stopwatchTime % 60;
+            
             document.getElementById('stopwatchDisplay').textContent = 
                 `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
-
-        function startStopwatch() {
-            const subject = document.getElementById('stopwatchSubject').value;
-            if (!subject) {
-                alert('Please select a subject first!');
+        
+        async function StartStopwatch() {
+            const subjectSelect = document.getElementById('StopwatchSubject');
+            const subjectId = subjectSelect.value;
+            
+            If (!subjectId) {
+                alert('Please Select a subject first!');
                 return;
             }
             
             document.getElementById('swStartBtn').classList.add('hidden');
-            document.getElementById('swPauseBtn').classList.remove('hidden');
+            document.getElementById('SwPauseBtn').classList.remove('hidden');
             
             stopwatchInterval = setInterval(() => {
                 stopwatchTime++;
-                updateStopwatchDisplay();
+                UpdateStopwatchDisplay();
             }, 1000);
         }
-
-        function pauseStopwatch() {
-            clearInterval(stopwatchInterval);
-            document.getElementById('swStartBtn').classList.remove('hidden');
-            document.getElementById('swPauseBtn').classList.add('hidden');
+        
+        Function PauseStopwatch() {
+            ClearInterval(stopwatchInterval);
+            document.getElementById('SwStartBtn').classList.remove('hidden');
+            document.getElementById('SwPauseBtn').classList.add('hidden');
         }
-
-        function stopStopwatch() {
-            const subject = document.getElementById('stopwatchSubject').value;
-            if (!subject || stopwatchTime === 0) {
+        
+        Async Function StopStopwatch() {
+            const subjectSelect = document.getElementById('StopwatchSubject');
+            const subjectId = subjectSelect.value;
+            const subjectName = subjectSelect.options[subjectSelect.selectedIndex].text;
+            
+            If (!subjectId || stopwatchTime === 0) {
                 alert('Please select a subject and start the stopwatch first!');
                 return;
             }
             
-            clearInterval(stopwatchInterval);
+            ClearInterval(stopwatchInterval);
             
             const today = new Date().toDateString();
-            const minutes = Math.floor(stopwatchTime / 60);
+            const durationMinutes = Math.floor(stopwatchTime / 60);
             
-            // Log study time
-            if (!currentUserData.studyLog[today]) {
-                currentUserData.studyLog[today] = { sessions: 0, minutes: 0, subjects: [] };
-            }
-            currentUserData.studyLog[today].sessions++;
-            currentUserData.studyLog[today].minutes += minutes;
-            if (!currentUserData.studyLog[today].subjects.includes(subject)) {
-                currentUserData.studyLog[today].subjects.push(subject);
+            // Log Study Time
+            If (!CurrentUserData.studyLog[today]) {
+                CurrentUserData.studyLog[today] = { sessions: 0, minutes: 0, subjects: [] };
             }
             
-            // Update subject time
-            const subj = currentUserData.subjects.find(s => s.name === subject);
-            if (subj) subj.totalTime += minutes;
+            CurrentUserData.studyLog[today].sessions++;
+            CurrentUserData.studyLog[today].minutes += DurationMinutes;
             
-            updateStreak();
-            currentUserData.totalStudyTime += minutes;
-            saveUserData();
+            If (!CurrentUserData.studyLog[today].subjects.includes(subjectName)) {
+                CurrentUserData.studyLog[today].subjects.push(subjectName);
+            }
+            
+            // Update Subject Total Time
+            const subject = CurrentUserData.Subjects.find(s => s.id === subjectId);
+            If (subject) subject.totalTime += DurationMinutes;
             
             // Add to laps
             const lapDiv = document.createElement('div');
             lapDiv.className = 'detail-item';
-            lapDiv.innerHTML = `
-                <div class="detail-label">${subject} - ${new Date().toLocaleTimeString()}</div>
-                <div class="detail-value">${Math.floor(stopwatchTime / 60)}m ${stopwatchTime % 60}s</div>
+            LapDiv.innerHTML = `
+                <div class="Detail-label">${subjectName} - ${new Date().toLocaleTimeString()}</div>
+                <div class="Detail-value">${Math.floor(stopwatchTime / 60)}m ${stopwatchTime % 60}s</div>
             `;
-            document.getElementById('stopwatchLaps').prepend(lapDiv);
+            document.getElementById('StopwatchLaps').prepend(lapDiv);
             
-            alert(`Stopwatch saved! ${minutes} minutes logged for ${subject}`);
+            UpdateStreak();
+            CurrentUserData.totalStudyTime += DurationMinutes;
             
-            // Reset
+            await SaveUserData();
+            
+            Alert(`Stopwatch saved! ${DurationMinutes} minutes logged for ${subjectName}`);
+            
             stopwatchTime = 0;
-            updateStopwatchDisplay();
-            document.getElementById('swStartBtn').classList.remove('hidden');
-            document.getElementById('swPauseBtn').classList.add('hidden');
-        }
-
-        function updateStreak() {
-            const today = new Date().toDateString();
-            const yesterday = new Date();
-            yesterday.setDate(yesterday.getDate() - 1);
-            const yesterdayStr = yesterday.toDateString();
-            
-            if (currentUserData.lastStudyDate === yesterdayStr) {
-                currentUserData.currentStreak++;
-            } else if (currentUserData.lastStudyDate !== today) {
-                currentUserData.currentStreak = 1;
-            }
-            
-            currentUserData.lastStudyDate = today;
+            UpdateStopwatchDisplay();
+            document.getElementById('SwStartBtn').classList.remove('hidden');
+            document.getElementById('SwPauseBtn').classList.add('hidden');
         }
 
         // ==================== TARGETS ====================
-        function renderTargets() {
-            const list = document.getElementById('targetsList');
+        Function RenderTargets() {
+            const list = document.getElementById('TargetsList');
             list.innerHTML = '';
             
-            currentUserData.targets.forEach(target => {
+            If (!CurrentUserData || !CurrentUserData.Targets) return;
+            
+            CurrentUserData.Targets.forEach(Target => {
                 const div = document.createElement('div');
-                div.className = 'target-item';
-                div.innerHTML = `
-                    <input type="checkbox" class="target-checkbox" ${target.completed ? 'checked' : ''} 
-                           onchange="toggleTarget(${target.id})">
-                    <span class="target-text ${target.completed ? 'completed' : ''}">${target.title}</span>
-                    <button class="target-delete" onclick="deleteTarget(${target.id})">Delete</button>
+                Div.className = 'Target-item';
+                Div.innerHTML = `
+                    <input type="checkbox" class="Target-checkbox" ${target.completed ? 'checked' : ''} 
+                           onchange="ToggleTarget('${target.id}')">
+                    <span class="Target-text ${target.completed ? 'completed' : ''}">${target.title}</span>
+                    <button class="Target-delete" onclick="DeleteTarget('${target.id}')">Delete</button>
                 `;
                 list.appendChild(div);
             });
         }
-
-        function addTarget() {
+        
+        Async Function AddTarget() {
             const input = document.getElementById('newTargetInput');
             const title = input.value.trim();
             
-            if (!title) return;
+            If (!title) return;
             
-            currentUserData.targets.push({
-                id: Date.now(),
-                title: title,
-                completed: false
+            CurrentUserData.Targets.push({
+                Id: Date.now().toString(),
+                Title: title,
+                completed: false,
+                createdAt: new Date().toISOString()
             });
             
             input.value = '';
-            saveUserData();
-            renderTargets();
+            await SaveUserData();
+            RenderTargets();
         }
-
-        function toggleTarget(id) {
-            const target = currentUserData.targets.find(t => t.id === id);
-            if (target) {
-                target.completed = !target.completed;
-                saveUserData();
-                renderTargets();
+        
+        Async Function ToggleTarget(id) {
+            const target = CurrentUserData.Targets.find(t => t.id === id);
+            If (target) {
+                target.completed = !Target.completed;
+                await SaveUserData();
+                RenderTargets();
             }
         }
-
-        function deleteTarget(id) {
-            currentUserData.targets = currentUserData.targets.filter(t => t.id !== id);
-            saveUserData();
-            renderTargets();
+        
+        Async Function DeleteTarget(id) {
+            CurrentUserData.Targets = CurrentUserData.Targets.filter(t => T.id !== id);
+            await SaveUserData();
+            RenderTargets();
         }
 
         // ==================== CALENDAR ====================
-function generateCalendar() {
-    const grid = document.getElementById('calendarGrid');
-    grid.innerHTML = '';
-    
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    days.forEach(day => {
-        const div = document.createElement('div');
-        div.className = 'calendar-day-header';
-        div.textContent = day;
-        grid.appendChild(div);
-    });
-    
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    
-    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                      'July', 'August', 'September', 'October', 'November', 'December'];
-    document.getElementById('currentMonth').textContent = `${monthNames[month]} ${year}`;
-    
-    for (let i = 0; i < firstDay; i++) {
-        const div = document.createElement('div');
-        div.className = 'calendar-day';
-        grid.appendChild(div);
-    }
-    
-    for (let i = 1; i <= daysInMonth; i++) {
-        const div = document.createElement('div');
-        div.className = 'calendar-day';
-        
-        const dateStr = new Date(year, month, i).toDateString();
-        const hasData = currentUserData.studyLog[dateStr];
-        
-        if (hasData) div.classList.add('has-data');
-        if (i === selectedDate.getDate() && month === selectedDate.getMonth() && 
-            year === selectedDate.getFullYear()) {
-            div.classList.add('active');
+        Function GenerateCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+            
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            Days.forEach(day => {
+                const Div = document.createElement('div');
+                Div.className = 'calendar-day-header';
+                Div.textContent = day;
+                grid.appendChild(div);
+            });
+            
+            const year = currentDate.getFullYear();
+            const Month = CurrentDate.getMonth();
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            document.getElementById('calendarMonth').textContent = `${monthNames[month]} ${year}`;
+            
+            // Empty slots
+            For (let i = 0; i < firstDay; i++) {
+                const Div = document.createElement('div');
+                Div.className = 'calendar-day';
+                grid.appendChild(div);
+            }
+            
+            // Days
+            For (let i = 1; i <= daysInMonth; i++) {
+                const Div = document.createElement('div');
+                Div.className = 'calendar-day';
+                
+                const dateStr = new Date(year, month, i).toDateString();
+                const hasData = CurrentUserData.studyLog && CurrentUserData.studyLog[dateStr];
+                
+                If (HasData) Div.classList.add('has-data');
+                
+                // Check if Selected Date
+                If (i === selectedDate.getDate() && month === selectedDate.getMonth() && year === selectedDate.getFullYear()) {
+                    Div.classList.add('active');
+                }
+                
+                Let html = `<div class="day-number">${i}</div>`;
+                
+                If (HasData) {
+                    const minutes = CurrentUserData.studyLog[dateStr].minutes;
+                    html += `<div class="day-info">${minutes}m studied</div>`;
+                    html += `<div class="day-studied">✓</div>`;
+                }
+                
+                Div.innerHTML = html;
+                Div.onclick = () => showDayDetails(new Date(year, month, i));
+                grid.appendChild(div);
+            }
         }
         
-        let html = `<div class="day-number">${i}</div>`;
-        if (hasData) {
-            html += `<div class="day-info">${hasData.minutes}m</div>`;
+        Function ChangeMonth(delta) {
+            CurrentDate.setMonth(CurrentDate.getMonth() + delta);
+            GenerateCalendar();
         }
-        div.innerHTML = html;
         
-        div.onclick = () => showDayDetails(new Date(year, month, i));
-        grid.appendChild(div);
-    }
-}
-        function changeMonth(delta) {
-            currentDate.setMonth(currentDate.getMonth() + delta);
-            generateCalendar();
-        }
-
-        function showDayDetails(date) {
+        Function ShowDayDetails(date) {
             const dateStr = date.toDateString();
-            const data = currentUserData.studyLog[dateStr];
+            const data = CurrentUserData.studyLog && CurrentUserData.studyLog[dateStr];
             
             document.getElementById('dayModalTitle').textContent = date.toDateString();
             
             const content = document.getElementById('dayModalContent');
-            if (!data) {
+            
+            If (!data) {
                 content.innerHTML = '<p style="color: var(--text-muted);">No study data for this day.</p>';
             } else {
-                const completedTargets = currentUserData.targets.filter(t => t.completed).length;
-                const totalTargets = currentUserData.targets.length;
+                const completedTargets = CurrentUserData.Targets ? CurrentUserData.Targets.filter(t => t.completed).length : 0;
+                const totalTargets = CurrentUserData.Targets ? CurrentUserData.Targets.length : 0;
                 
                 content.innerHTML = `
-                    <div class="detail-item">
-                        <div class="detail-label">Total Study Time</div>
-                        <div class="detail-value">${data.minutes} minutes</div>
+                    <div class="Detail-item">
+                        <div class="Detail-label">Total Study Time</div>
+                        <div class="Detail-value">${data.minutes} minutes</div>
                     </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Sessions</div>
-                        <div class="detail-value">${data.sessions}</div>
+                    <div class="Detail-item">
+                        <div class="Detail-label">Sessions</div>
+                        <div class="Detail-value">${data.sessions}</div>
                     </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Subjects Studied</div>
-                        <div class="detail-value">${data.subjects.join(', ')}</div>
+                    <div class="Detail-item">
+                        <div class="Detail-label">Subjects Studied</div>
+                        <div class="Detail-value">${data.subjects ? data.subjects.join(', ') : 'None'}</div>
                     </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Targets Achieved</div>
-                        <div class="detail-value">${completedTargets} / ${totalTargets}</div>
+                    <div class="Detail-item">
+                        <div class="Detail-label">Targets Completed</div>
+                        <div class="Detail-value">${completedTargets} / ${TotalTargets}</div>
                     </div>
                 `;
             }
             
             document.getElementById('dayModal').classList.add('active');
         }
-
-        function closeDayModal(event) {
-            if (!event || event.target.id === 'dayModal' || event.target.classList.contains('modal-close')) {
+        
+        Function CloseDayModal(event) {
+            If (!event || event.target.id === 'dayModal' || event.target.classList.contains('modal-close')) {
                 document.getElementById('dayModal').classList.remove('active');
             }
         }
 
         // ==================== MARKS ====================
-        function renderMarksCategories() {
-            const list = document.getElementById('marksCategories');
+        Function RenderMarksCategories() {
+            const list = document.getElementById('MarksCategories');
             let html = `
                 <div class="category-item ${currentCategory === 'all' ? 'active' : ''}" onclick="selectCategory('all')">
                     <span>All Marks</span>
-                    <span>${getTotalMarksCount()}</span>
-                </div>
+                    <span id="CountAll">${GetTotalMarksCount()}</span>
+                                </div>
             `;
             
-            Object.keys(currentUserData.marks).forEach(cat => {
+            Object.keys(CurrentUserData.marks || {}).forEach(cat => {
                 html += `
                     <div class="category-item ${currentCategory === cat ? 'active' : ''}" onclick="selectCategory('${cat}')">
                         <span>${cat}</span>
-                        <span>${currentUserData.marks[cat].length}</span>
+                        <span>${(CurrentUserData.marks[cat] || []).length}</span>
                     </div>
                 `;
             });
@@ -2167,200 +1429,212 @@ function generateCalendar() {
             
             // Update analytics dropdown
             const analyticsSelect = document.getElementById('analyticsCategory');
-            let options = '<option value="all">Overall (All Categories)</option>';
-            Object.keys(currentUserData.marks).forEach(cat => {
+            Let options = '<option value="all">Overall (All Categories)</option>';
+            Object.keys(CurrentUserData.marks || {}).ForEach(cat => {
                 options += `<option value="${cat}">${cat}</option>`;
             });
-            analyticsSelect.innerHTML = options;
+            AnalyticsSelect.innerHTML = options;
         }
-
-        function getTotalMarksCount() {
-            let count = 0;
-            Object.values(currentUserData.marks).forEach(arr => count += arr.length);
-            return count;
+        
+        Function GetTotalMarksCount() {
+            If (!CurrentUserData || !CurrentUserData.marks) return 0;
+            Let count = 0;
+            Object.values(CurrentUserData.marks).ForEach(arr => Count += arr.length);
+            Return count;
         }
-
-        function selectCategory(category) {
-            currentCategory = category;
-            renderMarksCategories();
-            renderMarks();
+        
+        Function SelectCategory(category) {
+            CurrentCategory = category;
+            RenderMarksCategories();
+            RenderMarks();
         }
-
-        function renderMarks() {
+        
+        Async Function RenderMarks() {
             const title = document.getElementById('currentCategoryTitle');
-            const tbody = document.getElementById('marksTableBody');
+            const tbody = document.getElementById('MarksTableBody');
             
-            let marks = [];
-            if (currentCategory === 'all') {
-                Object.values(currentUserData.marks).forEach(arr => marks.push(...arr));
-                title.textContent = 'All Marks';
+            Let marks = [];
+            If (CurrentCategory === 'all') {
+                Object.values(CurrentUserData.marks || {}).ForEach(arr => Marks.push(...arr));
+                Title.textContent = 'All Marks';
             } else {
-                marks = currentUserData.marks[currentCategory] || [];
-                title.textContent = currentCategory;
+                Marks = (CurrentUserData.marks && CurrentUserData.marks[CurrentCategory]) || [];
+                Title.textContent = CurrentCategory;
             }
             
-            if (marks.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No marks added yet</td></tr>';
+            If (Marks.length === 0) {
+                Tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">No marks added yet. Click "+ Add Paper" to start tracking.</td></tr>';
                 return;
             }
             
-            tbody.innerHTML = marks.map((mark, idx) => `
-                <tr>
-                    <td>${mark.paperNo}</td>
-                    <td>${mark.subject}</td>
-                    <td style="color: ${mark.score >= 75 ? 'var(--accent)' : mark.score >= 50 ? 'var(--warning)' : 'var(--danger)'}; font-weight: 700;">${mark.score}%</td>
-                    <td>${mark.date}</td>
-                    <td>
-                        <button class="target-delete" onclick="deleteMark('${mark.category}', ${idx})">Delete</button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function addCategory() {
-            const name = document.getElementById('newCategoryName').value.trim();
-            if (!name) return;
+            // Sort by date (newest first)
+            Marks.sort((a, b) => new Date(b.date) - new Date(a.date));
             
-            if (!currentUserData.marks[name]) {
-                currentUserData.marks[name] = [];
-                saveUserData();
-                renderMarksCategories();
-                document.getElementById('newCategoryName').value = '';
-            }
+            Tbody.innerHTML = Marks.map((mark, idx) => `
+                <tr>
+                    <td>${Mark.paperNo}</td>
+                    <td>${Mark.subject}</td>
+                    <td style="color: ${getMarkColor(Mark.score)}; font-weight: 700;">${Mark.score}%</td>
+                    <td>${Mark.Date}</td>
+                    <td>
+                        <button class="Target-delete" onclick="DeleteMark('${Mark.category}', ${idx})">Delete</button>
+                    </td>
+                `).join('');
         }
-
-        function openAddMarkModal() {
-            const categorySelect = document.getElementById('markCategory');
-            let options = '';
-            Object.keys(currentUserData.marks).forEach(cat => {
+        
+        Function GetMarkColor(score) {
+            If (score >= 80) return 'var(--success)';
+            If (score >= 60) return 'var(--warning)';
+            Return 'var(--danger)';
+        }
+        
+        Async Function AddCategory() {
+            const name = document.getElementById('newCategoryName').value.trim();
+            If (!name) return;
+            
+            If (!CurrentUserData.marks[name]) {
+                CurrentUserData.marks[name] = [];
+            }
+            
+            await SaveUserData();
+            RenderMarksCategories();
+            document.getElementById('NewCategoryName').value = '';
+        }
+        
+        Function OpenAddMarkModal() {
+            const categorySelect = document.getElementById('MarkCategory');
+            Let options = '';
+            Object.keys(CurrentUserData.marks || {}).ForEach(cat => {
                 options += `<option value="${cat}">${cat}</option>`;
             });
-            categorySelect.innerHTML = options;
-            
-            document.getElementById('addMarkModal').classList.add('active');
+            CategorySelect.innerHTML = options;
+            document.getElementById('AddMarkModal').classList.add('active');
         }
-
-        function closeMarkModal(event) {
-            if (!event || event.target.id === 'addMarkModal' || event.target.classList.contains('modal-close')) {
-                document.getElementById('addMarkModal').classList.remove('active');
+        
+        Function CloseMarkModal(event) {
+            If (!event || event.target.id === 'addMarkModal' || event.target.classList.contains('modal-close')) {
+                document.getElementById('AddMarkModal').classList.remove('active');
             }
         }
-
-        function saveMark() {
-            const category = document.getElementById('markCategory').value;
-            const paperNo = document.getElementById('markPaperNo').value.trim();
-            const subject = document.getElementById('markSubject').value;
-            const score = parseFloat(document.getElementById('markScore').value);
-            const date = document.getElementById('markDate').value;
+        
+        Async Function SaveMark() {
+            const category = document.getElementById('MarkCategory').value;
+            const paperNo = document.getElementById('MarkPaperNo').value.trim();
+            const subject = document.getElementById('MarkSubject').value;
+            const score = parseFloat(document.getElementById('MarkScore').value);
+            const Date = document.getElementById('MarkDate').value;
             
-            if (!category || !paperNo || !subject || isNaN(score) || !date) {
+            If (!category || !paperNo || !subject || isNaN(score) || !date) {
                 alert('Please fill in all fields!');
                 return;
             }
             
-            if (score < 0 || score > 100) {
+            If (score < 0 || score > 100) {
                 alert('Score must be between 0 and 100!');
                 return;
             }
             
-            if (!currentUserData.marks[category]) {
-                currentUserData.marks[category] = [];
+            If (!CurrentUserData.marks[category]) {
+                CurrentUserData.marks[category] = [];
             }
             
-            currentUserData.marks[category].push({
-                paperNo,
-                subject,
-                score,
-                date,
-                category
+            CurrentUserData.marks[category].push({
+                paperNo, subject, score, date, category
             });
             
-            saveUserData();
-            closeMarkModal();
-            renderMarksCategories();
-            renderMarks();
+            await SaveUserData();
+            CloseMarkModal();
+            RenderMarksCategories();
+            RenderMarks();
             
-            // Clear form
-            document.getElementById('markPaperNo').value = '';
-            document.getElementById('markScore').value = '';
+            // Clear Form
+            document.getElementById('MarkPaperNo').value = '';
+            document.getElementById('MarkScore').value = '';
         }
-
-        function deleteMark(category, index) {
-            if (confirm('Are you sure you want to delete this mark?')) {
-                currentUserData.marks[category].splice(index, 1);
-                if (currentUserData.marks[category].length === 0) {
-                    delete currentUserData.marks[category];
-                }
-                saveUserData();
-                renderMarksCategories();
-                renderMarks();
+        
+        Async Function DeleteMark(category, index) {
+            If (!confirm('Are you sure you want to delete this mark?')) return;
+            
+            CurrentUserData.marks[category].splice(index, 1);
+            If (CurrentUserData.marks[category].length === 0) {
+                Delete CurrentUserData.marks[category];
             }
+            
+            await SaveUserData();
+            RenderMarksCategories();
+            RenderMarks();
         }
 
         // ==================== ANALYTICS ====================
-        function initAnalytics() {
-    // Populate study subject filter
-    const studyFilter = document.getElementById('studySubjectFilter');
-    if (studyFilter && currentUserData.subjects) {
-        const options = currentUserData.subjects.map(s => 
-            `<option value="${s.name}">${s.name}</option>`
-        ).join('');
-        studyFilter.innerHTML = '<option value="all">Overall (All Subjects)</option>' + options;
-    }
-    
-    selectAnalyticsType('marks');
-}
-
-        function selectAnalyticsType(type) {
-            currentAnalyticsType = type;
+        Function InitAnalytics() {
+            // Populate study subject filter
+            const studyFilter = document.getElementById('analyticsSubject');
+            If (studyFilter && CurrentUserData && CurrentUserData.Subjects) {
+                const options = CurrentUserData.Subjects.map(s => 
+                    `<option value="${s.name}">${s.name}</option>`
+                ).join('');
+                studyFilter.innerHTML = '<option value="all">Overall (All Subjects)</option>' + options;
+            }
             
-            document.querySelectorAll('.analytics-item').forEach(item => {
-                item.classList.remove('active');
+            SelectAnalyticsType('marks');
+        }
+        
+        Function SelectAnalyticsType(type) {
+            CurrentAnalyticsType = type;
+            
+            document.querySelectorAll('.analytics-item').ForEach(item => {
+                Item.classList.remove('active');
             });
-            event.currentTarget.classList.add('active');
             
-            if (type === 'marks') {
-                document.getElementById('marksAnalytics').classList.remove('hidden');
-                document.getElementById('studyAnalytics').classList.add('hidden');
-                updateMarksChart();
+            If (event && event.currentTarget) {
+                Event.currentTarget.classList.add('active');
+            }
+            
+            const marksAnalytics = document.getElementById('MarksAnalytics');
+            const studyAnalytics = document.getElementById('StudyAnalytics');
+            
+            If (type === 'marks') {
+                MarksAnalytics.classList.remove('hidden');
+                StudyAnalytics.classList.add('hidden');
+                UpdateMarksChart();
             } else {
-                document.getElementById('marksAnalytics').classList.add('hidden');
-                document.getElementById('studyAnalytics').classList.remove('hidden');
-                updateStudyChart();
+                MarksAnalytics.classList.add('hidden');
+                StudyAnalytics.classList.remove('hidden');
+                UpdateStudyChart();
             }
         }
-
-        function updateMarksChart() {
+        
+        Function UpdateMarksChart() {
             const category = document.getElementById('analyticsCategory').value;
-            let marks = [];
+            Let marks = [];
             
-            if (category === 'all') {
-                Object.values(currentUserData.marks).forEach(arr => marks.push(...arr));
+            If (category === 'all') {
+                Object.values(CurrentUserData.marks || {}).ForEach(arr => Marks.push(...arr));
             } else {
-                marks = currentUserData.marks[category] || [];
+                Marks = (CurrentUserData.marks && CurrentUserData.marks[category]) || [];
             }
             
             // Sort by date
-            marks.sort((a, b) => new Date(a.date) - new Date(b.date));
+            Marks.sort((a, b) => new Date(a.date) - new Date(b.date));
             
-            const ctx = document.getElementById('marksChart').getContext('2d');
+            const ctx = document.getElementById('MarksChart');
             
-            if (marksChartInstance) {
-                marksChartInstance.destroy();
+            If (marksChartInstance) {
+                MarksChartInstance.destroy();
             }
             
-            if (marks.length === 0) {
+            If (Marks.length === 0) {
                 // Show empty state
-                return;
+                Return;
             }
             
             marksChartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: marks.map(m => `${m.subject} ${m.paperNo}`),
+                    labels: Marks.map(m => `${m.subject} ${M.paperNo}`),
                     datasets: [{
                         label: 'Marks (%)',
-                        data: marks.map(m => m.score),
+                        data: Marks.map(m => m.score),
                         borderColor: '#00d4ff',
                         backgroundColor: 'rgba(0, 212, 255, 0.1)',
                         borderWidth: 3,
@@ -2377,7 +1651,8 @@ function generateCalendar() {
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            labels: { color: '#fff', font: { family: 'Rajdhani' } }
+                            display: true,
+                            labels: { color: '#fff', font: { family: 'Rajdhani', size: 14 } }
                         }
                     },
                     scales: {
@@ -2395,131 +1670,211 @@ function generateCalendar() {
                 }
             });
         }
-
-        function setTimeFilter(filter) {
-            currentTimeFilter = filter;
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-            updateStudyChart();
+        
+        Function SetTimeFilter(filter) {
+            CurrentTimeFilter = filter;
+            document.querySelectorAll('.filter-btn').ForEach(b => B.classList.remove('active'));
+            
+            If (Event && Event.currentTarget) {
+                Event.currentTarget.classList.add('active');
+            }
+            
+            UpdateStudyChart();
         }
-
-        function updateStudyChart() {
-    const selectedSubject = document.getElementById('studySubjectFilter').value;
-    const now = new Date();
-    let days = 7;
-    
-    if (currentTimeFilter === 'week') days = 7;
-    else if (currentTimeFilter === 'month') days = 30;
-    else if (currentTimeFilter === '3months') days = 90;
-    else if (currentTimeFilter === 'year') days = 365;
-    else days = 3650; // all time
-    
-    const labels = [];
-    const data = [];
-    let totalSessions = 0;
-    let totalMinutes = 0;
-    let daysWithData = 0;
-    
-    for (let i = days - 1; i >= 0; i--) {
-        const d = new Date();
-        d.setDate(d.getDate() - i);
-        const dateStr = d.toDateString();
-        const log = currentUserData.studyLog[dateStr];
         
-        let minutes = 0;
-        
-        if (log) {
-            if (selectedSubject === 'all') {
-                // All subjects
-                minutes = log.minutes;
-                totalSessions += log.sessions;
-            } else {
-                // Specific subject - estimate based on subject presence
-                if (log.subjects && log.subjects.includes(selectedSubject)) {
-                    // Divide time equally among subjects studied that day
-                    minutes = Math.floor(log.minutes / log.subjects.length);
-                    totalSessions += 1;
+        Function UpdateStudyChart() {
+            const selectedSubject = document.getElementById('analyticsSubject').value;
+            const now = new Date();
+            Let days = 7;
+            
+            Switch(CurrentTimeFilter) {
+                Case 'week': days = 7; break;
+                Case 'month': days = 30; break;
+                Case '3months': days = 90; break;
+                Case 'year': days = 365; break;
+                Default: days = 3650;
+            }
+            
+            const labels = [];
+            const data = [];
+            Let totalSessions = 0;
+            Let totalMinutes = 0;
+            Let daysWithData = 0;
+            
+            For (let i = days - 1; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(now.getDate() - i);
+                const dateStr = d.toDateString();
+                const log = CurrentUserData && CurrentUserData.studyLog[dateStr];
+                
+                Let minutes = 0;
+                
+                If (log) {
+                    If (selectedSubject === 'all') {
+                        Minutes = log.minutes;
+                        TotalSessions += log.sessions;
+                    } else If (log.Subjects && log.Subjects.includes(selectedSubject)) {
+                        // Estimate based on subject presence
+                        Minutes = Math.floor(log.minutes / log.Subjects.length);
+                        TotalSessions += 1;
+                    }
+                    TotalMinutes += Minutes;
+                    DaysWithData++;
+                }
+                
+                // Only add to chart if has data
+                If (log || i < 30) {
+                    Labels.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+                    Data.push(minutes);
                 }
             }
-            totalMinutes += minutes;
-            daysWithData++;
-        }
-        
-        // Only add to chart if has data or within reasonable range
-        if (log || days <= 30) {
-            labels.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-            data.push(minutes);
-        }
-    }
-    
-    // Update stats
-    document.getElementById('totalStudySessions').textContent = totalSessions;
-    document.getElementById('totalStudyMinutes').textContent = totalMinutes;
-    document.getElementById('avgStudyTime').textContent = daysWithData > 0 ? 
-        Math.round(totalMinutes / daysWithData) : 0;
-    
-    const ctx = document.getElementById('studyChart').getContext('2d');
-    
-    if (studyChartInstance) {
-        studyChartInstance.destroy();
-    }
-    
-    // Different color for different subjects
-    const colors = {
-        'all': { border: '#00ff88', bg: 'rgba(0, 255, 136, 0.1)' },
-        'default': { border: '#00d4ff', bg: 'rgba(0, 212, 255, 0.1)' }
-    };
-    
-    const color = selectedSubject === 'all' ? colors.all : colors.default;
-    
-    studyChartInstance = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: selectedSubject === 'all' ? 'All Subjects (minutes)' : `${selectedSubject} (minutes)`,
-                data: data,
-                borderColor: color.border,
-                backgroundColor: color.bg,
-                borderWidth: 3,
-                tension: 0.4,
-                fill: true,
-                pointBackgroundColor: color.border,
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2,
-                pointRadius: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    labels: { color: '#fff', font: { family: 'Rajdhani' } }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                    ticks: { color: '#888', font: { family: 'Rajdhani' } }
+            
+            // Update Stats
+            document.getElementById('totalStudySessions').textContent = TotalSessions;
+            document.getElementById('totalStudyMinutes').textContent = TotalMinutes;
+            document.getElementById('AvgStudyTime').textContent = DaysWithData > 0 ? Math.round(TotalMinutes / DaysWithData) : 0;
+            
+            const ctx = document.getElementById('StudyChart');
+            
+            If (studyChartInstance) {
+                StudyChartInstance.destroy();
+            }
+            
+            const colors = {
+                'all': { border: '#00ff88', bg: 'rgba(0, 255, 136, 0.1)' },
+                'default': { border: '#00d4ff', bg: 'rgba(0, 212, 255, 0.1)' }
+            };
+            
+            const color = selectedSubject === 'all' ? colors.all : colors.default;
+            
+            StudyChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: selectedSubject === 'all' ? 'All Subjects (minutes)' : `${selectedSubject} (minutes)`,
+                        data: data,
+                        borderColor: color.border,
+                        backgroundColor: color.bg,
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: color.border,
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 4
+                    }]
                 },
-                x: {
-                    grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                    ticks: { 
-                        color: '#888', 
-                        font: { family: 'Rajdhani' },
-                        maxTicksLimit: 10
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: { color: '#fff', font: { family: 'Rajdhani' } }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            ticks: { color: '#888', font: { family: 'Rajdhani' } }
+                        },
+                        x: {
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            ticks: { 
+                                color: '#888', 
+                                font: { family: 'Rajdhani' },
+                                maxTicksLimit: 10
+                            }
+                        }
                     }
                 }
+            });
+        }
+        
+        // ==================== STREAK ====================
+        Function UpdateStreak() {
+            If (!CurrentUserData) return;
+            
+            const today = new Date().toDateString();
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayStr = yesterday.toDateString();
+            
+            If (CurrentUserData.lastStudyDate === yesterdayStr) {
+                CurrentUserData.currentStreak++;
+            } else If (CurrentUserData.lastStudyDate !== today) {
+                CurrentUserData.currentStreak = 1;
+            }
+            
+            CurrentUserData.lastStudyDate = today;
+        }
+        
+        // ==================== UI HELPERS ====================
+        Function showLoading(show) {
+            document.getElementById('loadingOverlay').classList.toggle('active', show);
+        }
+        
+        Function showSyncStatus(status) {
+            const el = document.getElementById('syncStatus');
+            el.className = 'sync-status show';
+            
+            If (status === 'syncing') {
+                El.textContent = 'Syncing...';
+                El.classList.add('syncing');
+            } else If (status === 'synced') {
+                El.textContent = '✓ Saved';
+                El.classList.remove('syncing');
+                El.classList.add('synced');
+                SetTimeout(() => el.classList.remove('show'), 2000);
+            } Else If (status === 'error') {
+                El.textContent = '✗ Error';
+                El.classList.remove('syncing');
+                El.classList.add('synced');
             }
         }
-    });
-}
-
-        // ==================== DATA PERSISTENCE ====================
-        function saveUserData() {
-            localStorage.setItem(`studyTracker_${currentUser.id}`, JSON.stringify(currentUserData));
+        
+        Function HideSyncStatus() {
+            document.getElementById('syncStatus').classList.remove('show');
+        }
+        
+        // ==================== PROFILE MODAL ====================
+        Function OpenProfile() {
+            If (!CurrentUserData) return;
+            
+            document.getElementById('modalAvatar').src = CurrentUserData.profile.photo;
+            document.getElementById('modalName').textContent = CurrentUserData.profile.name;
+            document.getElementById('ModalStream').textContent = CurrentUserData.profile.stream;
+            document.getElementById('ModalEmail').textContent = CurrentUserData.profile.email || 'Not set';
+            
+            const hours = Math.floor((CurrentUserData.totalStudyTime || 0) / 60);
+            const mins = (CurrentUserData.totalStudyTime || 0) % 60;
+            document.getElementById('ModalStudyTime').textContent = `${hours}h ${mins}m`;
+            document.getElementById('ModalStreak').textContent = `${CurrentUserData.currentStreak || 0} days`;
+            
+            document.getElementById('profileModal').classList.add('active');
+        }
+        
+        Function CloseProfile(event) {
+            If (!event || event.target.id === 'profileModal' || event.target.classList.contains('modal-close')) {
+                document.getElementById('profileModal').classList.remove('active');
+            }
+        }
+        
+        // ==================== HOME STATS ====================
+        Function UpdateHomeStats() {
+            If (!CurrentUserData) return;
+            
+            const today = new Date().toDateString();
+            const todayData = CurrentUserData.studyLog && CurrentUserData.studyLog[today];
+            const completedTargets = CurrentUserData.Targets ? CurrentUserData.Targets.filter(t => T.completed).length : 0;
+            const totalTargets = CurrentUserData.Targets ? CurrentUserData.Targets.length : 0;
+            
+            const pendingText = completedTargets < TotalTargets ? 
+                `${TotalTargets - CompletedTargets} pending` : 'All Targets Completed!';
+            
+            document.getElementById('homeTargetsCount').textContent = pendingText;
         }
     </script>
 </body>
