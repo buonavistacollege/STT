@@ -1267,41 +1267,23 @@
             </div>
         </div>
 
-       <!-- CALENDAR -->
-<div id="calendarScreen" class="feature-section">
-    <div class="section-header">
-        <h2 class="section-title">📅 STUDY CALENDAR</h2>
-        <button class="back-btn" onclick="goHome()">← Back to Home</button>
-    </div>
-    
-    <div class="calendar-compact">
-        <div class="compact-card">
-            <div class="calendar-header" style="margin-bottom: 15px;">
-                <button class="calendar-nav" onclick="changeMonth(-1)" style="padding: 6px 12px; font-size: 0.8rem;">◀</button>
-                <div class="calendar-month" id="calendarMonth" style="font-size: 1rem;">Month</div>
-                <button class="calendar-nav" onclick="changeMonth(1)" style="padding: 6px 12px; font-size: 0.8rem;">▶</button>
+        <!-- CALENDAR -->
+        <div id="calendarScreen" class="feature-section">
+            <div class="section-header">
+                <h2 class="section-title">📅 STUDY CALENDAR</h2>
+                <button class="back-btn" onclick="goHome()">← Back to Home</button>
             </div>
             
-            <div class="calendar-grid-compact" id="calendarGrid"></div>
-        </div>
-        
-        <!-- Mini Stats -->
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px;">
-            <div class="stat-card" style="padding: 15px;">
-                <div class="stat-value" id="calTotalDays" style="font-size: 1.5rem;">0</div>
-                <div class="stat-label" style="font-size: 0.75rem;">Study Days</div>
-            </div>
-            <div class="stat-card" style="padding: 15px;">
-                <div class="stat-value" id="calTotalMinutes" style="font-size: 1.5rem;">0</div>
-                <div class="stat-label" style="font-size: 0.75rem;">This Month</div>
-            </div>
-            <div class="stat-card" style="padding: 15px;">
-                <div class="stat-value" id="calAvgTime" style="font-size: 1.5rem;">0</div>
-                <div class="stat-label" style="font-size: 0.75rem;">Avg/Day</div>
+            <div class="calendar-container">
+                <div class="calendar-header">
+                    <button class="calendar-nav" onclick="changeMonth(-1)">◀</button>
+                    <div class="calendar-month" id="calendarMonth">Month Year</div>
+                    <button class="calendar-nav" onclick="changeMonth(1)">▶</button>
+                </div>
+                
+                <div class="calendar-grid" id="calendarGrid"></div>
             </div>
         </div>
-    </div>
-</div>
 
         <!-- MARKS -->
         <div id="marksScreen" class="feature-section">
