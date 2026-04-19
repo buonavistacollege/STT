@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Study Tracker Pro - Firebase Edition</title>
+    <title>Study Tracker Pro - Code Login Edition</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.0/firebase-firestore-compat.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;700&display=swap');
@@ -42,14 +41,12 @@
         .gap-2 { gap: 0.5rem; } .gap-4 { gap: 1rem; }
         .w-full { width: 100%; } .text-center { text-align: center; }
         
-        /* Screens */
         .screen {
             min-height: 100vh; display: none; flex-direction: column;
             align-items: center; justify-content: center; padding: 20px;
         }
         .screen.active { display: flex; }
         
-        /* Login Screen */
         .login-container {
             background: linear-gradient(145deg, var(--bg-card) 0%, var(--bg-hover) 100%);
             border: 2px solid var(--primary); border-radius: 20px; padding: 40px;
@@ -100,7 +97,6 @@
         
         .error-msg { color: var(--danger); margin-top: 15px; text-align: center; font-size: 0.9rem; }
         
-        /* Profile Setup */
         .setup-container {
             background: linear-gradient(145deg, var(--bg-card) 0%, var(--bg-hover) 100%);
             border: 2px solid var(--primary); border-radius: 20px; padding: 40px;
@@ -112,11 +108,10 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             cursor: pointer; transition: all 0.3s; margin: 0 auto 20px; position: relative; overflow: hidden;
         }
-        .Profile-photo-upload:hover { border-color: var(--secondary); box-shadow: 0 0 20px rgba(0, 212, 255, 0.3); }
-        .Profile-photo-upload img { width: 100%; height: 100%; object-fit: cover; position: absolute; }
+        .profile-photo-upload:hover { border-color: var(--secondary); box-shadow: 0 0 20px rgba(0, 212, 255, 0.3); }
+        .profile-photo-upload img { width: 100%; height: 100%; object-fit: cover; position: absolute; }
         .photo-placeholder { font-size: 3rem; color: var(--primary); }
         
-        /* Stream Selection */
         .stream-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; width: 100%; max-width: 800px; }
         .stream-card {
             background: linear-gradient(145deg, var(--bg-card) 0%, var(--bg-hover) 100%);
@@ -126,8 +121,8 @@
         .stream-card:hover, .stream-card.selected { border-color: var(--primary); transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3); }
         .stream-icon { font-size: 3rem; margin-bottom: 15px; }
         .stream-name { font-family: 'Orbitron', sans-serif; font-size: 1.3rem; color: var(--primary); margin-bottom: 10px; }
+        .stream-desc { color: var(--text-muted); font-size: 0.9rem; }
         
-        /* App Layout */
         .app-container { display: none; min-height: 100vh; }
         .app-container.active { display: block; }
         
@@ -156,7 +151,6 @@
         .mini-name { font-weight: 700; font-size: 0.9rem; }
         .mini-stream { font-size: 0.75rem; color: var(--primary); }
         
-        /* Home Dashboard */
         .home-dashboard { max-width: 1400px; margin: 0 auto; padding: 40px 20px; }
         .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin-top: 30px; }
         .dashboard-card {
@@ -174,7 +168,6 @@
         .card-title { font-family: 'Orbitron', sans-serif; font-size: 1.3rem; color: var(--primary); margin-bottom: 10px; }
         .card-desc { color: var(--text-muted); font-size: 0.9rem; }
         
-        /* Feature Sections */
         .feature-section { display: none; max-width: 1400px; margin: 0 auto; padding: 30px 20px; }
         .feature-section.active { display: block; }
         
@@ -190,7 +183,6 @@
         }
         .back-btn:hover { background: var(--primary); color: var(--bg-dark); }
         
-        /* Timer Section */
         .timer-container {
             background: linear-gradient(145deg, var(--bg-card) 0%, var(--bg-hover) 100%);
             border-radius: 20px; padding: 40px; border: 1px solid rgba(0, 212, 255, 0.2); max-width: 800px; margin: 0 auto;
@@ -222,26 +214,25 @@
         }
         .mode-btn.active { border-color: var(--primary); color: var(--primary); box-shadow: 0 0 15px rgba(0, 212, 255, 0.3); }
         
-        /* Daily Targets */
         .targets-container {
             background: linear-gradient(145deg, var(--bg-card) 0%, var(--bg-hover) 100%);
             border-radius: 20px; padding: 30px; border: 1px solid rgba(0, 212, 255, 0.2);
         }
         .add-target-form { display: flex; gap: 10px; margin-bottom: 25px; }
         .target-input { flex: 1; padding: 12px; background: rgba(0, 0, 0, 0.3); border: 1px solid #2a2a4a; color: var(--text); border-radius: 8px; font-size: 1rem; }
-        .Target-list { display: flex; flex-direction: column; gap: 12px; }
-        .Target-item {
+        .target-list { display: flex; flex-direction: column; gap: 12px; }
+        .target-item {
             background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(0, 212, 255, 0.1); border-radius: 12px;
             padding: 15px 20px; display: flex; align-items: center; gap: 15px; transition: all 0.3s;
         }
-        .Target-item:hover { border-color: rgba(0, 212, 255, 0.3); transform: translateX(5px); }
-        .Target-checkbox { width: 24px; height: 24px; cursor: pointer; accent-color: var(--primary); }
-        .Target-text { flex: 1; font-size: 1.1rem; }
-        .Target-text.completed { text-decoration: line-through; color: var(--text-muted); }
-        .Target-delete { background: rgba(255, 68, 68, 0.2); border: none; color: var(--danger); padding: 8px 15px; border-radius: 6px; cursor: pointer; transition: all 0.3s; }
-        .Target-delete:hover { background: rgba(255, 68, 68, 0.4); }
+        .target-item:hover { border-color: rgba(0, 212, 255, 0.3); transform: translateX(5px); }
+        .target-checkbox { width: 24px; height: 24px; cursor: pointer; accent-color: var(--primary); }
+        .target-text { flex: 1; font-size: 1.1rem; }
+        .target-text.completed { text-decoration: line-through; color: var(--text-muted); }
+        .target-delete { background: rgba(255, 68, 68, 0.2); border: none; color: var(--danger); padding: 8px 15px; border-radius: 6px; cursor: pointer; transition: all 0.3s; }
+        .target-delete:hover { background: rgba(255, 68, 68, 0.4); }
         
-        /* Calendar - FIXED */
+        /* FIXED CALENDAR */
         .calendar-wrapper { 
             background: linear-gradient(145deg, var(--bg-card) 0%, var(--bg-hover) 100%);
             border-radius: 20px; padding: 30px; border: 1px solid rgba(0, 212, 255, 0.2);
@@ -262,16 +253,15 @@
         .calendar-day {
             aspect-ratio: 1; background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(0, 212, 255, 0.1);
             border-radius: 10px; padding: 10px; cursor: pointer; transition: all 0.3s; position: relative;
-            min-height: 100px; display: flex; flex-direction: column;
+            min-height: 80px; display: flex; flex-direction: column;
         }
         .calendar-day:hover { border-color: var(--primary); transform: scale(1.05); }
         .calendar-day.active { border-color: var(--primary); box-shadow: 0 0 15px rgba(0, 212, 255, 0.3); background: rgba(0, 212, 255, 0.2); }
         .calendar-day.has-data { background: rgba(0, 255, 136, 0.2); border-color: var(--accent); }
         .day-number { font-weight: 700; font-size: 1.2rem; color: var(--primary); }
         .day-info { font-size: 0.8rem; color: var(--text-muted); margin-top: 5px; }
-        .day-studied { font-size: 0.75rem; color: var(--accent); margin-top: auto; }
+        .day-studied { font-size: 0.75rem; color: var(--accent); margin-top: auto; font-weight: bold; }
         
-        /* Marks Section */
         .marks-container { display: grid; grid-template-columns: 300px 1fr; gap: 30px; }
         @media (max-width: 968px) { .marks-container { grid-template-columns: 1fr; } }
         
@@ -296,7 +286,6 @@
         .marks-table th { color: var(--primary); font-family: 'Orbitron', sans-serif; font-size: 0.9rem; text-transform: uppercase; }
         .mark-input { width: 80px; padding: 8px; background: rgba(0, 0, 0, 0.3); border: 1px solid #2a2a4a; color: var(--text); border-radius: 6px; text-align: center; }
         
-        /* Analytics */
         .analytics-container { display: grid; grid-template-columns: 250px 1fr; gap: 30px; }
         @media (max-width: 968px) { .analytics-container { grid-template-columns: 1fr; } }
         
@@ -319,7 +308,6 @@
         }
         .filter-btn.active { border-color: var(--primary); color: var(--primary); background: rgba(0, 212, 255, 0.1); }
         
-        /* Profile Modal */
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.85); z-index: 1000; justify-content: center; align-items: center; padding: 20px;
@@ -338,13 +326,11 @@
         .profile-label { color: var(--primary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
         .profile-value { font-size: 1.1rem; padding: 10px; background: rgba(0, 0, 0, 0.2); border-radius: 8px; }
         
-        /* Day Detail Modal */
         .day-detail-content { max-width: 600px; }
         .detail-item { background: rgba(0, 0, 0, 0.2); border-radius: 10px; padding: 15px; margin-bottom: 15px; }
         .detail-label { color: var(--primary); font-size: 0.85rem; text-transform: uppercase; margin-bottom: 5px; }
         .detail-value { font-size: 1.2rem; font-weight: 600; }
         
-        /* Loading Overlay */
         .loading-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9);
             display: none; justify-content: center; align-items: center; z-index: 2000; flex-direction: column;
@@ -357,12 +343,12 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        /* Sync Status */
         .sync-status { position: fixed; bottom: 20px; right: 20px; padding: 10px 20px; background: rgba(0,0,0,0.8); border-radius: 20px; font-size: 0.8rem; color: var(--primary); border: 1px solid var(--primary); display: none; }
         .sync-status.show { display: block; }
         .sync-status.syncing { color: var(--warning); }
         .sync-status.synced { color: var(--success); }
     </style>
+<base target="_blank">
 </head>
 <body>
     <div class="bg-animation"></div>
@@ -377,16 +363,17 @@
         <div class="login-container">
             <h1 class="logo-title">STUDY TRACKER PRO</h1>
             <div class="input-group">
-                <label>Email</label>
-                <input type="email" id="loginEmail" class="input-field" placeholder="Enter your email">
+                <label>Access Code</label>
+                <input type="password" id="loginCode" class="input-field" placeholder="Enter your code (e.g., 2008)">
+            </div>
             <div class="input-group">
                 <label>Password</label>
                 <input type="password" id="loginPassword" class="input-field" placeholder="Enter password">
             </div>
-            <button class="btn-gaming" onclick="handleLogin()">Login</button>
+            <button class="btn-gaming" onclick="handleLogin()">Initialize System</button>
             <div class="error-msg" id="loginError"></div>
             <p style="text-align: center; margin-top: 20px; color: var(--text-muted); font-size: 0.9rem;">
-                Demo: student@example.com / password: 123456
+                Demo: Code 2008, 2009, or 2010 / Password: 12345
             </p>
         </div>
     </div>
@@ -405,15 +392,62 @@
                 <input type="text" id="setupName" class="input-field" placeholder="Enter your full name">
             </div>
             <div class="input-group">
-                <label>Stream</label>
-                <select id="SetupStream" class="input-field">
-                    <option value="Science">Science</option>
-                    <option value="Commerce">Commerce</option>
-                    <option value="Arts">Arts</option>
-                    <option value="Engineering">Engineering</option>
-                </select>
+                <label>Birthday</label>
+                <input type="date" id="setupBirthday" class="input-field">
             </div>
-            <button class="btn-gaming" onclick="completeProfileSetup()">Continue</button>
+            <div class="input-group">
+                <label>Email</label>
+                <input type="email" id="setupEmail" class="input-field" placeholder="your@email.com">
+            </div>
+            <div class="input-group">
+                <label>School/Institution</label>
+                <input type="text" id="setupSchool" class="input-field" placeholder="Enter school name">
+            </div>
+            <button class="btn-gaming" onclick="goToStreamSelection()">Continue</button>
+        </div>
+    </div>
+
+    <!-- STREAM SELECTION -->
+    <div id="streamScreen" class="screen">
+        <h2 class="logo-title">SELECT YOUR STREAM</h2>
+        <div class="stream-grid">
+            <div class="stream-card" onclick="selectStream('science')">
+                <span class="stream-icon">🔬</span>
+                <div class="stream-name">Science Stream</div>
+                <div class="stream-desc">Physics, Chemistry, Biology & More</div>
+            </div>
+            <div class="stream-card" onclick="selectStream('commerce')">
+                <span class="stream-icon">💼</span>
+                <div class="stream-name">Commerce Stream</div>
+                <div class="stream-desc">Accounting, Economics, Business</div>
+            </div>
+            <div class="stream-card" onclick="selectStream('arts')">
+                <span class="stream-icon">🎨</span>
+                <div class="stream-name">Arts Stream</div>
+                <div class="stream-desc">Literature, History, Philosophy</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SUBJECT SETUP -->
+    <div id="subjectSetupScreen" class="screen">
+        <div class="setup-container">
+            <h2 class="logo-title">ADD YOUR SUBJECTS</h2>
+            <div id="subjectInputs">
+                <div class="input-group">
+                    <label>Subject 1</label>
+                    <input type="text" class="setup-subject input-field" placeholder="e.g., Physics">
+                </div>
+                <div class="input-group">
+                    <label>Subject 2</label>
+                    <input type="text" class="setup-subject input-field" placeholder="e.g., Chemistry">
+                </div>
+                <div class="input-group">
+                    <label>Subject 3</label>
+                    <input type="text" class="setup-subject input-field" placeholder="e.g., Mathematics">
+                </div>
+            </div>
+            <button class="btn-gaming" onclick="completeSetup()">Complete Setup</button>
         </div>
     </div>
 
@@ -444,33 +478,33 @@
                 <div class="dashboard-grid">
                     <div class="dashboard-card" onclick="showFeature('timer')">
                         <span class="card-icon">⏱️</span>
- <div class="card-title">Study Timer</div>
-                        <div class="card-desc">Pomodoro & Custom Sessions</div>
+                        <div class="card-title">Study Timer</div>
+                        <div class="card-desc">40min focus sessions with smart breaks</div>
                     </div>
                     <div class="dashboard-card" onclick="showFeature('stopwatch')">
                         <span class="card-icon">⏲️</span>
                         <div class="card-title">Stopwatch</div>
-                        <div class="card-desc">Track unlimited sessions</div>
+                        <div class="card-desc">Track unlimited study sessions</div>
                     </div>
                     <div class="dashboard-card" onclick="showFeature('targets')">
                         <span class="card-icon">🎯</span>
                         <div class="card-title">Daily Targets</div>
-                        <div class="card-desc" id="homeTargetsCount">Manage daily goals</div>
+                        <div class="card-desc" id="homeTargetsCount">Manage your daily goals</div>
                     </div>
                     <div class="dashboard-card" onclick="showFeature('calendar')">
                         <span class="card-icon">📅</span>
                         <div class="card-title">Calendar</div>
-                        <div class="card-desc">View study history</div>
+                        <div class="card-desc">View your study history</div>
                     </div>
                     <div class="dashboard-card" onclick="showFeature('marks')">
                         <span class="card-icon">📝</span>
-                        <div class="card-title">Academic Marks</div>
-                        <div class="card-desc">Track your progress</div>
+                        <div class="card-title">Add Marks</div>
+                        <div class="card-desc">Track your academic progress</div>
                     </div>
                     <div class="dashboard-card" onclick="showFeature('analytics')">
                         <span class="card-icon">📊</span>
                         <div class="card-title">Analytics</div>
-                        <div class="card-desc">Visualize achievements</div>
+                        <div class="card-desc">Visualize your progress</div>
                     </div>
                 </div>
             </div>
@@ -480,18 +514,17 @@
         <div id="timerScreen" class="feature-section">
             <div class="section-header">
                 <h2 class="section-title">⏱️ STUDY TIMER</h2>
-                <button class="back-btn" onclick="goHome()">← Back</button>
+                <button class="back-btn" onclick="goHome()">← Back to Home</button>
             </div>
             <div class="timer-container">
                 <div class="subject-selector">
                     <label>Select Subject</label>
-                    <select id="timerSubject" class="subject-dropdown"><option value="">Choose subject...</option></select>
+                    <select id="timerSubject" class="subject-dropdown"><option value="">Choose a subject...</option></select>
                 </div>
                 <div class="mode-toggle">
                     <button class="mode-btn active" onclick="setTimerMode('pomodoro')">Pomodoro (40m)</button>
                     <button class="mode-btn" onclick="setTimerMode('short')">Short (25m)</button>
-                    <button class="mode-btn" onclick="SetTimerMode('long')">Long (60m)</button>
-                    <button class="mode-btn" onclick="setTimerMode('custom')">Custom</button>
+                    <button class="mode-btn" onclick="setTimerMode('long')">Long (60m)</button>
                 </div>
                 <div class="timer-display" id="timerDisplay">40:00</div>
                 <div class="timer-controls">
@@ -503,7 +536,7 @@
                     <div id="timerProgress" style="width: 0%; height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); transition: width 1s linear;"></div>
                 </div>
                 <div style="margin-top: 20px; text-align: center; color: var(--text-muted);">
-                    <p id="timerModeInfo">Study: 40min → Break: 10min</p>
+                    <p>Study: 40min → Break: 10min (2x) → Long Break: 20min</p>
                 </div>
             </div>
         </div>
@@ -512,12 +545,12 @@
         <div id="stopwatchScreen" class="feature-section">
             <div class="section-header">
                 <h2 class="section-title">⏲️ STUDY STOPWATCH</h2>
-                <button class="back-btn" onclick="goHome()">← Back</button>
+                <button class="back-btn" onclick="goHome()">← Back to Home</button>
             </div>
             <div class="timer-container">
                 <div class="subject-selector">
                     <label>Select Subject</label>
-                    <select id="StopwatchSubject" class="subject-dropdown"><option value="">Choose subject...</option></select>
+                    <select id="stopwatchSubject" class="subject-dropdown"><option value="">Choose a subject...</option></select>
                 </div>
                 <div class="timer-display" id="stopwatchDisplay">00:00:00</div>
                 <div class="timer-controls">
@@ -533,14 +566,14 @@
         <div id="targetsScreen" class="feature-section">
             <div class="section-header">
                 <h2 class="section-title">🎯 DAILY TARGETS</h2>
-                <button class="back-btn" onclick="goHome()">← Back</button>
+                <button class="back-btn" onclick="goHome()">← Back to Home</button>
             </div>
-            <div class="Targets-container">
+            <div class="targets-container">
                 <div class="add-target-form">
-                    <input type="text" id="newTargetInput" class="Target-input" placeholder="Add a new target...">
+                    <input type="text" id="newTargetInput" class="target-input" placeholder="Add a new target...">
                     <button class="btn-gaming" style="width: auto;" onclick="addTarget()">Add</button>
                 </div>
-                <div class="Target-list" id="TargetsList"></div>
+                <div class="target-list" id="targetsList"></div>
             </div>
         </div>
 
@@ -548,7 +581,7 @@
         <div id="calendarScreen" class="feature-section">
             <div class="section-header">
                 <h2 class="section-title">📅 STUDY CALENDAR</h2>
-                <button class="back-btn" onclick="goHome()">← Back</button>
+                <button class="back-btn" onclick="goHome()">← Back to Home</button>
             </div>
             <div class="calendar-wrapper">
                 <div class="calendar-header">
@@ -557,7 +590,7 @@
                     <button class="calendar-nav" onclick="changeMonth(1)">▶</button>
                 </div>
                 <div class="calendar-grid-container" id="calendarGrid">
-                    <!-- Calendar grid will be generated here -->
+                    <!-- Calendar grid generated here -->
                 </div>
             </div>
         </div>
@@ -566,7 +599,7 @@
         <div id="marksScreen" class="feature-section">
             <div class="section-header">
                 <h2 class="section-title">📝 ACADEMIC MARKS</h2>
-                <button class="back-btn" onclick="goHome()">← Back</button>
+                <button class="back-btn" onclick="goHome()">← Back to Home</button>
             </div>
             <div class="marks-container">
                 <div class="marks-sidebar">
@@ -579,7 +612,7 @@
                             <label>New Category</label>
                             <input type="text" id="newCategoryName" class="input-field" placeholder="e.g., Term Test">
                         </div>
- <button class="btn-gaming" onclick="addCategory()" style="margin-top: 10px;">Add Category</button>
+                        <button class="btn-gaming" onclick="addCategory()" style="margin-top: 10px;">Add Category</button>
                     </div>
                 </div>
                 <div class="marks-main">
@@ -589,7 +622,7 @@
                     </div>
                     <div id="marksContent">
                         <table class="marks-table" id="marksTable">
-                            <thead><tr><th>Paper</th><th>Subject</th><th>Marks</th><th>Date</th><th>Actions</th></tr></thead>
+                            <thead><tr><th>Paper No</th><th>Subject</th><th>Marks</th><th>Date</th><th>Actions</th></tr></thead>
                             <tbody id="marksTableBody"></tbody>
                         </table>
                     </div>
@@ -601,7 +634,7 @@
         <div id="analyticsScreen" class="feature-section">
             <div class="section-header">
                 <h2 class="section-title">📊 ANALYTICS</h2>
-                <button class="back-btn" onclick="goHome()">← Back</button>
+                <button class="back-btn" onclick="goHome()">← Back to Home</button>
             </div>
             <div class="analytics-container">
                 <div class="analytics-sidebar">
@@ -615,8 +648,54 @@
                             <div style="font-size: 0.85rem; color: var(--text-muted);">Visualize study habits</div>
                         </div>
                     </div>
+                </div>
                 <div class="analytics-main" id="analyticsMain">
-                    <!-- Dynamic content based on selection -->
+                    <!-- Marks Analytics -->
+                    <div id="marksAnalytics">
+                        <div style="margin-bottom: 20px;">
+                            <label style="color: var(--primary); display: block; margin-bottom: 10px;">Select Category</label>
+                            <select id="analyticsCategory" class="subject-dropdown" onchange="updateMarksChart()">
+                                <option value="all">Overall (All Categories)</option>
+                            </select>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="marksChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Study Time Analytics -->
+                    <div id="studyAnalytics" class="hidden">
+                        <div style="margin-bottom: 20px;">
+                            <label style="color: var(--primary); display: block; margin-bottom: 10px;">Select Subject</label>
+                            <select id="studySubjectFilter" class="subject-dropdown" onchange="updateStudyChart()">
+                                <option value="all">Overall (All Subjects)</option>
+                            </select>
+                        </div>
+                        <div class="time-filter">
+                            <button class="filter-btn active" onclick="setTimeFilter('week')">Last Week</button>
+                            <button class="filter-btn" onclick="setTimeFilter('month')">Last Month</button>
+                            <button class="filter-btn" onclick="setTimeFilter('3months')">Last 3 Months</button>
+                            <button class="filter-btn" onclick="setTimeFilter('year')">Last Year</button>
+                            <button class="filter-btn" onclick="setTimeFilter('all')">All Time</button>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="studyChart"></canvas>
+                        </div>
+                        <div id="studyStats" style="margin-top: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                            <div class="detail-item">
+                                <div class="detail-label">Total Sessions</div>
+                                <div class="detail-value" id="totalStudySessions">0</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Total Minutes</div>
+                                <div class="detail-value" id="totalStudyMinutes">0</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Avg Per Day</div>
+                                <div class="detail-value" id="avgStudyTime">0</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -627,11 +706,13 @@
                 <button class="modal-close" onclick="closeProfile()">×</button>
                 <div class="profile-display">
                     <img id="modalAvatar" class="profile-avatar-large" alt="Profile">
-                    <h2 id="ModalName" style="margin-bottom: 20px;"></h2>
-                    <div class="profile-field"><div class="profile-label">Stream</div><div class="profile-value" id="ModalStream"></div></div>
-                    <div class="profile-field"><div class="profile-label">Email</div><div class="profile-value" id="ModalEmail"></div></div>
-                    <div class="profile-field"><div class="profile-label">Total Study Time</div><div class="profile-value" id="ModalStudyTime"></div></div>
-                    <div class="profile-field"><div class="profile-label">Current Streak</div><div class="profile-value" id="ModalStreak"></div></div>
+                    <h2 id="modalName" style="margin-bottom: 20px;"></h2>
+                    <div class="profile-field"><div class="profile-label">Stream</div><div class="profile-value" id="modalStream"></div></div>
+                    <div class="profile-field"><div class="profile-label">Birthday</div><div class="profile-value" id="modalBirthday"></div></div>
+                    <div class="profile-field"><div class="profile-label">Email</div><div class="profile-value" id="modalEmail"></div></div>
+                    <div class="profile-field"><div class="profile-label">School</div><div class="profile-value" id="modalSchool"></div></div>
+                    <div class="profile-field"><div class="profile-label">Total Study Time</div><div class="profile-value" id="modalStudyTime"></div></div>
+                    <div class="profile-field"><div class="profile-label">Current Streak</div><div class="profile-value" id="modalStreak"></div></div>
                 </div>
             </div>
         </div>
@@ -643,23 +724,23 @@
                 <h2 class="logo-title" style="font-size: 1.5rem; margin-bottom: 20px;">ADD NEW PAPER</h2>
                 <div class="input-group">
                     <label>Category</label>
-                    <select id="MarkCategory" class="input-field"></select>
+                    <select id="markCategory" class="input-field"></select>
                 </div>
                 <div class="input-group">
-                    <label>Paper Name</label>
-                    <input type="text" id="MarkPaperNo" class="input-field" placeholder="e.g., Paper 1">
+                    <label>Paper Number</label>
+                    <input type="text" id="markPaperNo" class="input-field" placeholder="e.g., Paper 1">
                 </div>
- <div class="input-group">
+                <div class="input-group">
                     <label>Subject</label>
-                    <select id="MarkSubject" class="input-field"></select>
+                    <select id="markSubject" class="input-field"></select>
                 </div>
                 <div class="input-group">
                     <label>Marks (%)</label>
-                    <input type="number" id="MarkScore" class="input-field" placeholder="0-100" min="0" max="100">
+                    <input type="number" id="markScore" class="input-field" placeholder="0-100" min="0" max="100">
                 </div>
                 <div class="input-group">
                     <label>Date</label>
-                    <input type="date" id="MarkDate" class="input-field">
+                    <input type="date" id="markDate" class="input-field">
                 </div>
                 <button class="btn-gaming" onclick="saveMark()">Save Mark</button>
             </div>
@@ -677,25 +758,33 @@
 
     <script>
         // ==================== FIREBASE CONFIG ====================
+        // Replace with your actual Firebase config
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "your-project.firebaseapp.com",
-            projectId: "your-project-id",
-            storageBucket: "your-project.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "1:123456789:web:abcdef123456"
-        };
+  apiKey: "AIzaSyB7pSst30W3Dc__v6BwmXG2TDVwkIWm_Tg",
+  authDomain: "sttmine-f276a.firebaseapp.com",
+  projectId: "sttmine-f276a",
+  storageBucket: "https://sttmine-f276a-default-rtdb.asia-southeast1.firebasedatabase.app/",
+  messagingSenderId: "717570363267",
+  appId: "1:717570363267:web:f20a4c173cc56756cdb0b6"
+};
         
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        const auth = firebase.auth();
         
-        // ==================== GLOBAL STATE ====================
+        // ==================== USER MANAGEMENT ====================
+        const USERS = {
+            '2008': { password: '12345', name: 'Chamuditha Osanda', id: 'user1' },
+            '2009': { password: '12345', name: 'User Beta', id: 'user2' },
+            '2010': { password: '12345', name: 'User Gamma', id: 'user3' }
+        };
+
         let currentUser = null;
         let currentUserData = null;
+        let currentCode = null;
         let currentUserDocRef = null;
-        
+
+        // ==================== STATE MANAGEMENT ====================
         let timerInterval = null;
         let stopwatchInterval = null;
         let timerTimeLeft = 40 * 60;
@@ -712,179 +801,97 @@
         
         let marksChartInstance = null;
         let studyChartInstance = null;
-        let pendingSync = false;
 
         // ==================== INITIALIZATION ====================
         document.addEventListener('DOMContentLoaded', function() {
-            // Set today's date for mark input
-            const today = new Date();
-            document.getElementById('MarkDate').valueAsDate = today;
-            
-            // Check if user is already logged in
-            auth.onAuthStateChanged((user) => {
-                if (user) {
-                    currentUser = user;
-                    loadUserData();
-                } else {
-                    showScreen('loginScreen');
-                }
-            });
+            document.getElementById('markDate').valueAsDate = new Date();
         });
 
         // ==================== AUTHENTICATION ====================
         async function handleLogin() {
-            const email = document.getElementById('loginEmail').value;
+            const code = document.getElementById('loginCode').value;
             const password = document.getElementById('loginPassword').value;
             const errorDiv = document.getElementById('loginError');
             
-            showLoading(true);
-            
-            try {
-                const userCredential = await auth.signInWithEmailAndPassword(email, password);
-                currentUser = userCredential.user;
-                await loadUserData();
-            } catch (error) {
-                showLoading(false);
-                errorDiv.textContent = getErrorMessage(error.code);
-            }
-        }
-        
-        async function register() {
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            const errorDiv = document.getElementById('loginError');
-            
-            if (!email || !password) {
-                errorDiv.textContent = 'Please fill in all fields';
+            if (!USERS[code]) {
+                errorDiv.textContent = 'Invalid access code!';
                 return;
             }
             
+            if (USERS[code].password !== password) {
+                errorDiv.textContent = 'Invalid password!';
+                return;
+            }
+            
+            currentCode = code;
+            currentUser = USERS[code];
+            
             showLoading(true);
             
+            // Check Firebase for existing data
             try {
-                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                currentUser = userCredential.user;
+                const doc = await db.collection('users').doc(currentUser.id).get();
                 
-                // Create initial user data
-                const initialData = {
-                    profile: {
-                        name: email.split('@')[0],
-                        email: email,
-                        photo: 'https://ui-avatars.com/api/?name=' + encodeURIComponent(email.split('@')[0]) + '&background=0d4ff&color=fff',
-                        stream: 'Science',
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    },
-                    subjects: [
-                        { id: 'sub1', name: 'Mathematics', totalTime: 0 },
-                        { id: 'sub2', name: 'Physics', totalTime: 0 },
-                        { id: 'sub3', name: 'Chemistry', totalTime: 0 }
-                    ],
-                    Targets: [],
-                    marks: {},
-                    studyLog: {},
-                    totalStudyTime: 0,
-                    currentStreak: 0,
-                    lastStudyDate: null
-                };
-                
-                await db.collection('users').doc(currentUser.uid).set(initialData);
-                await LoadUserData();
-                
+                if (doc.exists) {
+                    currentUserData = doc.data();
+                    currentUserDocRef = doc.ref;
+                    showApp();
+                } else {
+                    // First time user - show profile setup
+                    showScreen('profileSetupScreen');
+                }
             } catch (error) {
+                console.error('Firebase error:', error);
+                // Fallback to localStorage if Firebase fails
+                const savedData = localStorage.getItem(`studyTracker_${currentUser.id}`);
+                if (savedData) {
+                    currentUserData = JSON.parse(savedData);
+                    showApp();
+                } else {
+                    showScreen('profileSetupScreen');
+                }
+            } finally {
                 showLoading(false);
-                errorDiv.textContent = getErrorMessage(error.code);
             }
         }
-        
-        function getErrorMessage(code) {
-            const messages = {
-                'auth/user-not-found': 'User not found. Please register first.',
-                'auth/wrong-password': 'Incorrect password.',
-                'auth/invalid-email': 'Invalid email format.',
-                'auth/weak-password': 'Password should be at least 6 characters.',
-                'auth/email-already-in-use': 'Email already registered.'
-            };
-            return messages[code] || 'An error occurred. Please try again.';
-        }
-        
+
         async function logout() {
             if (confirm('Are you sure you want to logout?')) {
-                await auth.signOut();
                 currentUser = null;
                 currentUserData = null;
+                currentCode = null;
                 currentUserDocRef = null;
                 location.reload();
             }
         }
 
-        // ==================== DATA MANAGEMENT ====================
-        async function LoadUserData() {
-            if (!currentUser) return;
-            
-            showLoading(true);
-            showSyncStatus('syncing');
-            
-            try {
-                const doc = await db.collection('users').doc(currentUser.uid).get();
-                
-                if (doc.exists) {
-                    currentUserData = doc.data();
-                    currentUserDocRef = doc.ref;
-                    
-                    // Ensure all required fields exist
-                    if (!currentUserData.Subjects) currentUserData.Subjects = [];
-                    if (!currentUserData.Targets) currentUserData.Targets = [];
-                    if (!currentUserData.marks) currentUserData.marks = {};
-                    if (!currentUserData.studyLog) currentUserData.studyLog = {};
-                    
-                    showApp();
-                } else {
-                    // New user - create profile
-                    showScreen('profileSetupScreen');
-                }
-                
-                showLoading(false);
-                showSyncStatus('synced');
-                setTimeout(() => hideSyncStatus(), 2000);
-                
-            } catch (error) {
-                showLoading(false);
-                console.error('Error loading data:', error);
-                alert('Error loading your data. Please refresh.');
-            }
-        }
-        
+        // ==================== DATA PERSISTENCE ====================
         async function saveUserData() {
-            if (!currentUser || !currentUserDocRef) return;
+            // Always save to localStorage as backup
+            localStorage.setItem(`studyTracker_${currentUser.id}`, JSON.stringify(currentUserData));
             
-            showSyncStatus('syncing');
-            pendingSync = true;
-            
-            try {
-                await currentUserDocRef.update({
-                    ...currentUserData,
-                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                
-                showSyncStatus('synced');
-                pendingSync = false;
-                setTimeout(() => HideSyncStatus(), 2000);
-                
-            } catch (error) {
-                console.error('Error saving:', error);
-                showSyncStatus('error');
-                pendingSync = false;
+            // Try to save to Firebase
+            if (currentUser && currentUserDocRef) {
+                showSyncStatus('syncing');
+                try {
+                    await currentUserDocRef.set(currentUserData, { merge: true });
+                    showSyncStatus('synced');
+                    setTimeout(hideSyncStatus, 2000);
+                } catch (error) {
+                    console.error('Firebase save error:', error);
+                    showSyncStatus('error');
+                }
             }
         }
 
         // ==================== PROFILE SETUP ====================
         let tempProfilePhoto = null;
-        
+
         function handlePhotoUpload(event) {
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = async function(e) {
+                reader.onload = function(e) {
                     tempProfilePhoto = e.target.result;
                     document.getElementById('previewPhoto').src = e.target.result;
                     document.getElementById('previewPhoto').classList.remove('hidden');
@@ -893,34 +900,80 @@
                 reader.readAsDataURL(file);
             }
         }
-        
-        async function completeProfileSetup() {
+
+        function goToStreamSelection() {
             const name = document.getElementById('setupName').value;
-            const stream = document.getElementById('SetupStream').value;
-            const photo = tempProfilePhoto || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(name) + '&background=0d4ff&color=fff';
+            const birthday = document.getElementById('setupBirthday').value;
+            const email = document.getElementById('setupEmail').value;
+            const school = document.getElementById('setupSchool').value;
             
-            if (!name || !stream) {
+            if (!name || !birthday || !email || !school) {
                 alert('Please fill in all fields!');
                 return;
             }
             
-            showLoading(true);
+            currentUserData = {
+                profile: {
+                    name: name,
+                    birthday: birthday,
+                    email: email,
+                    school: school,
+                    photo: tempProfilePhoto || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">👤</text></svg>'
+                },
+                stream: '',
+                subjects: [],
+                targets: [],
+                marks: {},
+                studyLog: {},
+                totalStudyTime: 0,
+                currentStreak: 0,
+                lastStudyDate: null
+            };
             
-            try {
-                const updateData = {
-                    'profile.name': name,
-                    'profile.stream': stream,
-                    'profile.photo': photo,
-                    'profile.setupComplete': true
-                };
-                
-                await currentUserDocRef.update(updateData);
-                await LoadUserData();
-                
-            } catch (error) {
-                showLoading(false);
-                alert('Error saving profile. Please try again.');
+            showScreen('streamScreen');
+        }
+
+        function selectStream(stream) {
+            currentUserData.stream = stream;
+            showScreen('subjectSetupScreen');
+        }
+
+        async function completeSetup() {
+            const subjectInputs = document.querySelectorAll('.setup-subject');
+            const subjects = [];
+            
+            subjectInputs.forEach(input => {
+                if (input.value.trim()) {
+                    subjects.push({
+                        id: Date.now() + Math.random(),
+                        name: input.value.trim(),
+                        totalTime: 0
+                    });
+                }
+            });
+            
+            if (subjects.length === 0) {
+                alert('Please add at least one subject!');
+                return;
             }
+            
+            currentUserData.subjects = subjects;
+            
+            // Create default targets based on subjects
+            currentUserData.targets = subjects.map((sub, idx) => ({
+                id: Date.now() + idx,
+                title: `Study ${sub.name} for 1 hour`,
+                completed: false,
+                subject: sub.name
+            }));
+            
+            // Create Firebase document reference
+            currentUserDocRef = db.collection('users').doc(currentUser.id);
+            
+            await saveUserData();
+            
+            document.getElementById('subjectSetupScreen').classList.remove('active');
+            showApp();
         }
 
         // ==================== SCREEN MANAGEMENT ====================
@@ -928,48 +981,23 @@
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(screenId).classList.add('active');
         }
-        
+
         function showApp() {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById('appContainer').classList.add('active');
             document.getElementById('appContainer').style.display = 'block';
             
-            // Update Header
-            updateHeaderInfo();
+            document.getElementById('headerName').textContent = currentUserData.profile.name;
+            document.getElementById('headerStream').textContent = currentUserData.stream.toUpperCase();
+            document.getElementById('headerAvatar').src = currentUserData.profile.photo;
             
-            // Populate dropdowns
             populateSubjectDropdowns();
-            
-            // Update Home Stats
             updateHomeStats();
             
-            // Show home screen
-            showScreen('homeScreen');
+            document.querySelectorAll('.feature-section').forEach(f => f.classList.remove('active'));
+            document.getElementById('homeScreen').classList.add('active');
         }
-        
-        function updateHeaderInfo() {
-            if (!currentUserData) return;
-            
-            document.getElementById('headerName').textContent = currentUserData.profile.name;
-            document.getElementById('headerStream').textContent = currentUserData.profile.stream;
-            document.getElementById('headerAvatar').src = currentUserData.profile.photo;
-        }
-        
-        function populateSubjectDropdowns() {
-            if (!currentUserData || !currentUserData.Subjects) return;
-            
-            const options = currentUserData.Subjects.map(s => 
-                `<option value="${s.id}">${s.name}</option>`
-            ).join('');
-            
-            ['TimerSubject', 'StopwatchSubject', 'MarkSubject', 'analyticsSubject'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) {
-                    el.innerHTML = '<option value="">Choose subject...</option>' + options;
-                }
-            });
-        }
-        
+
         function showFeature(feature) {
             document.querySelectorAll('.feature-section').forEach(f => {
                 f.classList.remove('active');
@@ -991,19 +1019,16 @@
                 screen.style.display = 'block';
                 screen.classList.add('active');
                 
-                // Initialize feature-specific content
                 if (feature === 'targets') renderTargets();
                 if (feature === 'calendar') generateCalendar();
-                If (feature === 'marks') {
+                if (feature === 'marks') {
                     renderMarksCategories();
-                    RenderMarks();
+                    renderMarks();
                 }
-                If (feature === 'analytics') {
-                    InitAnalytics();
-                }
+                if (feature === 'analytics') initAnalytics();
             }
         }
-        
+
         function goHome() {
             pauseTimer();
             pauseStopwatch();
@@ -1013,18 +1038,73 @@
                 f.style.display = 'none';
             });
             
-            showScreen('homeScreen');
+            const homeScreen = document.getElementById('homeScreen');
+            homeScreen.style.display = 'block';
+            homeScreen.classList.add('active');
             updateHomeStats();
+        }
+
+        function populateSubjectDropdowns() {
+            if (!currentUserData || !currentUserData.subjects) return;
+            
+            const options = currentUserData.subjects.map(s => 
+                `<option value="${s.name}">${s.name}</option>`
+            ).join('');
+            
+            ['timerSubject', 'stopwatchSubject', 'markSubject'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.innerHTML = '<option value="">Choose a subject...</option>' + options;
+                }
+            });
+            
+            const studyFilter = document.getElementById('studySubjectFilter');
+            if (studyFilter) {
+                studyFilter.innerHTML = '<option value="all">Overall (All Subjects)</option>' + options;
+            }
+        }
+
+        function updateHomeStats() {
+            if (!currentUserData) return;
+            
+            const today = new Date().toDateString();
+            const todayData = currentUserData.studyLog[today];
+            const pendingTargets = currentUserData.targets.filter(t => !t.completed).length;
+            
+            document.getElementById('homeTargetsCount').textContent = 
+                pendingTargets > 0 ? `${pendingTargets} pending targets` : 'All targets completed!';
+        }
+
+        // ==================== PROFILE MODAL ====================
+        function openProfile() {
+            if (!currentUserData) return;
+            
+            document.getElementById('modalAvatar').src = currentUserData.profile.photo;
+            document.getElementById('modalName').textContent = currentUserData.profile.name;
+            document.getElementById('modalStream').textContent = currentUserData.stream.toUpperCase();
+            document.getElementById('modalBirthday').textContent = currentUserData.profile.birthday;
+            document.getElementById('modalEmail').textContent = currentUserData.profile.email;
+            document.getElementById('modalSchool').textContent = currentUserData.profile.school;
+            document.getElementById('modalStudyTime').textContent = 
+                `${Math.floor(currentUserData.totalStudyTime / 60)}h ${currentUserData.totalStudyTime % 60}m`;
+            document.getElementById('modalStreak').textContent = `${currentUserData.currentStreak} days`;
+            
+            document.getElementById('profileModal').classList.add('active');
+        }
+
+        function closeProfile(event) {
+            if (!event || event.target.id === 'profileModal' || event.target.classList.contains('modal-close')) {
+                document.getElementById('profileModal').classList.remove('active');
+            }
         }
 
         // ==================== TIMER ====================
         function setTimerMode(mode) {
             currentTimerMode = mode;
-            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
             
-            // Find the button that was clicked and activate it
-            const buttons = document.querySelectorAll('.mode-btn');
-            buttons.forEach(btn => {
+            // Update active button
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.remove('active');
                 if (btn.textContent.toLowerCase().includes(mode)) {
                     btn.classList.add('active');
                 }
@@ -1033,608 +1113,555 @@
             const times = {
                 'pomodoro': 40 * 60,
                 'short': 25 * 60,
-                'long': 60 * 60,
-                'custom': 30 * 60
+                'long': 60 * 60
             };
             
-            timerTimeLeft = times[mode] || 30 * 60;
+            timerTimeLeft = times[mode] || 40 * 60;
             updateTimerDisplay();
-            UpdateTimerModeInfo();
         }
-        
-        function UpdateTimerModeInfo() {
-            const info = document.getElementById('timerModeInfo');
-            const messages = {
-                'pomodoro': 'Study: 40min → Break: 10min (2x) → Long Break: 20min',
-                'short': 'Study: 25min → Break: 5min',
-                'long': 'Study: 60min → Break: 15min',
-                'custom': 'Custom timer duration'
-            };
-            info.textContent = messages[currentTimerMode] || messages['custom'];
-        }
-        
+
         function updateTimerDisplay() {
-            const hours = Math.floor(timerTimeLeft / 3600);
-            const minutes = Math.floor((timerTimeLeft % 3600) / 60);
-            const Seconds = timerTimeLeft % 60;
-            
-            let display = '';
-            if (hours > 0) display += `${hours.toString().padStart(2, '0')}:`;
-            display += `${Minutes.toString().padStart(2, '0')}:${Seconds.toString().padStart(2, '0')}`;
-            
-            document.getElementById('timerDisplay').textContent = display;
+            const minutes = Math.floor(timerTimeLeft / 60);
+            const seconds = timerTimeLeft % 60;
+            document.getElementById('timerDisplay').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
-        
-        function UpdateTimerProgress() {
+
+        function updateTimerProgress() {
             let totalTime;
-            switch(currentTimerMode) {
-                case 'pomodoro': totalTime = 40 * 60; break;
-                case 'short': totalTime = 25 * 60; break;
-                case 'Long': totalTime = 60 * 60; break;
-                default: totalTime = timerTimeLeft;
-            }
+            if (currentTimerMode === 'pomodoro') totalTime = 40 * 60;
+            else if (currentTimerMode === 'short') totalTime = 25 * 60;
+            else totalTime = 60 * 60;
             
-            const progress = Math.max(0, Math.min(100, ((totalTime - timerTimeLeft) / totalTime) * 100));
+            const progress = ((totalTime - timerTimeLeft) / totalTime) * 100;
             document.getElementById('timerProgress').style.width = progress + '%';
         }
-        
-        async function startTimer() {
-            const subjectSelect = document.getElementById('TimerSubject');
-            const subjectId = subjectSelect.value;
-            const subjectName = subjectSelect.options[subjectSelect.selectedIndex].text;
-            
-            if (!subjectId) {
+
+        function startTimer() {
+            const subject = document.getElementById('timerSubject').value;
+            if (!subject) {
                 alert('Please select a subject first!');
                 return;
             }
             
             document.getElementById('timerStartBtn').classList.add('hidden');
-            document.getElementById('TimerPauseBtn').classList.remove('hidden');
+            document.getElementById('timerPauseBtn').classList.remove('hidden');
             
-            // Record start Time
-            const startTime = Date.now();
-            
-            TimerInterval = setInterval(() => {
+            timerInterval = setInterval(() => {
                 if (timerTimeLeft > 0) {
-                    TimerTimeLeft--;
-                    UpdateTimerDisplay();
-                    UpdateTimerProgress();
+                    timerTimeLeft--;
+                    updateTimerDisplay();
+                    updateTimerProgress();
                 } else {
-                    clearInterval(TimerInterval);
-                    CompleteTimerSession(subjectId, subjectName, startTime);
+                    completeTimerSession(subject);
                 }
             }, 1000);
         }
-        
+
         function pauseTimer() {
-            clearInterval(TimerInterval);
-            document.getElementById('TimerStartBtn').classList.remove('hidden');
-            document.getElementById('TimerPauseBtn').classList.add('hidden');
+            clearInterval(timerInterval);
+            document.getElementById('timerStartBtn').classList.remove('hidden');
+            document.getElementById('timerPauseBtn').classList.add('hidden');
         }
-        
+
         function resetTimer() {
             pauseTimer();
-            const times = {
-                'pomodoro': 40 * 60,
-                'short': 25 * 60,
-                'Long': 60 * 60,
-                'custom': 30 * 60
-            };
-            
-            timerTimeLeft = times[currentTimerMode] || 30 * 60;
-            UpdateTimerDisplay();
-            document.getElementById('TimerProgress').style.width = '0%';
+            if (currentTimerMode === 'pomodoro') timerTimeLeft = 40 * 60;
+            else if (currentTimerMode === 'short') timerTimeLeft = 25 * 60;
+            else timerTimeLeft = 60 * 60;
+            updateTimerDisplay();
+            document.getElementById('timerProgress').style.width = '0%';
         }
-        
-        async function CompleteTimerSession(subjectId, subjectName, startTime) {
-            const endTime = Date.now();
-            const durationMinutes = Math.floor((endTime - startTime) / 60000);
+
+        async function completeTimerSession(subject) {
+            clearInterval(timerInterval);
             
-            // Log Study Session
             const today = new Date().toDateString();
+            const sessionMinutes = currentTimerMode === 'pomodoro' ? 40 : 
+                                  currentTimerMode === 'short' ? 25 : 60;
             
             if (!currentUserData.studyLog[today]) {
                 currentUserData.studyLog[today] = { sessions: 0, minutes: 0, subjects: [] };
             }
-            
-            CurrentUserData.studyLog[today].sessions++;
-            CurrentUserData.studyLog[today].minutes += durationMinutes;
-            
-            if (!CurrentUserData.studyLog[today].subjects.includes(subjectName)) {
-                CurrentUserData.studyLog[today].subjects.push(subjectName);
+            currentUserData.studyLog[today].sessions++;
+            currentUserData.studyLog[today].minutes += sessionMinutes;
+            if (!currentUserData.studyLog[today].subjects.includes(subject)) {
+                currentUserData.studyLog[today].subjects.push(subject);
             }
             
-            // Update Subject Total Time
-            const subject = CurrentUserData.Subjects.find(s => s.id === subjectId);
-            If (subject) {
-                subject.totalTime += DurationMinutes;
-            }
+            const subj = currentUserData.subjects.find(s => s.name === subject);
+            if (subj) subj.totalTime += sessionMinutes;
             
-            // Update Streak
-            UpdateStreak();
-            
-            CurrentUserData.totalStudyTime += DurationMinutes;
+            updateStreak();
+            currentUserData.totalStudyTime += sessionMinutes;
             
             await saveUserData();
             
-            Alert(`Session complete! ${durationMinutes} minutes logged for ${subjectName}`);
-            ResetTimer();
+            alert(`Session complete! ${sessionMinutes} minutes logged for ${subject}`);
+            resetTimer();
         }
 
         // ==================== STOPWATCH ====================
-        function UpdateStopwatchDisplay() {
+        function updateStopwatchDisplay() {
             const hours = Math.floor(stopwatchTime / 3600);
             const minutes = Math.floor((stopwatchTime % 3600) / 60);
-            const Seconds = stopwatchTime % 60;
-            
+            const seconds = stopwatchTime % 60;
             document.getElementById('stopwatchDisplay').textContent = 
                 `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
-        
-        async function StartStopwatch() {
-            const subjectSelect = document.getElementById('StopwatchSubject');
-            const subjectId = subjectSelect.value;
-            
-            If (!subjectId) {
-                alert('Please Select a subject first!');
+
+        function startStopwatch() {
+            const subject = document.getElementById('stopwatchSubject').value;
+            if (!subject) {
+                alert('Please select a subject first!');
                 return;
             }
             
             document.getElementById('swStartBtn').classList.add('hidden');
-            document.getElementById('SwPauseBtn').classList.remove('hidden');
+            document.getElementById('swPauseBtn').classList.remove('hidden');
             
             stopwatchInterval = setInterval(() => {
                 stopwatchTime++;
-                UpdateStopwatchDisplay();
+                updateStopwatchDisplay();
             }, 1000);
         }
-        
-        Function PauseStopwatch() {
-            ClearInterval(stopwatchInterval);
-            document.getElementById('SwStartBtn').classList.remove('hidden');
-            document.getElementById('SwPauseBtn').classList.add('hidden');
+
+        function pauseStopwatch() {
+            clearInterval(stopwatchInterval);
+            document.getElementById('swStartBtn').classList.remove('hidden');
+            document.getElementById('swPauseBtn').classList.add('hidden');
         }
-        
-        Async Function StopStopwatch() {
-            const subjectSelect = document.getElementById('StopwatchSubject');
-            const subjectId = subjectSelect.value;
-            const subjectName = subjectSelect.options[subjectSelect.selectedIndex].text;
-            
-            If (!subjectId || stopwatchTime === 0) {
+
+        async function stopStopwatch() {
+            const subject = document.getElementById('stopwatchSubject').value;
+            if (!subject || stopwatchTime === 0) {
                 alert('Please select a subject and start the stopwatch first!');
                 return;
             }
             
-            ClearInterval(stopwatchInterval);
+            clearInterval(stopwatchInterval);
             
             const today = new Date().toDateString();
-            const durationMinutes = Math.floor(stopwatchTime / 60);
+            const minutes = Math.floor(stopwatchTime / 60);
             
-            // Log Study Time
-            If (!CurrentUserData.studyLog[today]) {
-                CurrentUserData.studyLog[today] = { sessions: 0, minutes: 0, subjects: [] };
+            if (!currentUserData.studyLog[today]) {
+                currentUserData.studyLog[today] = { sessions: 0, minutes: 0, subjects: [] };
+            }
+            currentUserData.studyLog[today].sessions++;
+            currentUserData.studyLog[today].minutes += minutes;
+            if (!currentUserData.studyLog[today].subjects.includes(subject)) {
+                currentUserData.studyLog[today].subjects.push(subject);
             }
             
-            CurrentUserData.studyLog[today].sessions++;
-            CurrentUserData.studyLog[today].minutes += DurationMinutes;
+            const subj = currentUserData.subjects.find(s => s.name === subject);
+            if (subj) subj.totalTime += minutes;
             
-            If (!CurrentUserData.studyLog[today].subjects.includes(subjectName)) {
-                CurrentUserData.studyLog[today].subjects.push(subjectName);
-            }
+            updateStreak();
+            currentUserData.totalStudyTime += minutes;
             
-            // Update Subject Total Time
-            const subject = CurrentUserData.Subjects.find(s => s.id === subjectId);
-            If (subject) subject.totalTime += DurationMinutes;
+            await saveUserData();
             
-            // Add to laps
             const lapDiv = document.createElement('div');
             lapDiv.className = 'detail-item';
-            LapDiv.innerHTML = `
-                <div class="Detail-label">${subjectName} - ${new Date().toLocaleTimeString()}</div>
-                <div class="Detail-value">${Math.floor(stopwatchTime / 60)}m ${stopwatchTime % 60}s</div>
+            lapDiv.innerHTML = `
+                <div class="detail-label">${subject} - ${new Date().toLocaleTimeString()}</div>
+                <div class="detail-value">${Math.floor(stopwatchTime / 60)}m ${stopwatchTime % 60}s</div>
             `;
-            document.getElementById('StopwatchLaps').prepend(lapDiv);
+            document.getElementById('stopwatchLaps').prepend(lapDiv);
             
-            UpdateStreak();
-            CurrentUserData.totalStudyTime += DurationMinutes;
-            
-            await SaveUserData();
-            
-            Alert(`Stopwatch saved! ${DurationMinutes} minutes logged for ${subjectName}`);
+            alert(`Stopwatch saved! ${minutes} minutes logged for ${subject}`);
             
             stopwatchTime = 0;
-            UpdateStopwatchDisplay();
-            document.getElementById('SwStartBtn').classList.remove('hidden');
-            document.getElementById('SwPauseBtn').classList.add('hidden');
+            updateStopwatchDisplay();
+            document.getElementById('swStartBtn').classList.remove('hidden');
+            document.getElementById('swPauseBtn').classList.add('hidden');
+        }
+
+        function updateStreak() {
+            const today = new Date().toDateString();
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayStr = yesterday.toDateString();
+            
+            if (currentUserData.lastStudyDate === yesterdayStr) {
+                currentUserData.currentStreak++;
+            } else if (currentUserData.lastStudyDate !== today) {
+                currentUserData.currentStreak = 1;
+            }
+            
+            currentUserData.lastStudyDate = today;
         }
 
         // ==================== TARGETS ====================
-        Function RenderTargets() {
-            const list = document.getElementById('TargetsList');
+        function renderTargets() {
+            const list = document.getElementById('targetsList');
             list.innerHTML = '';
             
-            If (!CurrentUserData || !CurrentUserData.Targets) return;
+            if (!currentUserData || !currentUserData.targets) return;
             
-            CurrentUserData.Targets.forEach(Target => {
+            currentUserData.targets.forEach(target => {
                 const div = document.createElement('div');
-                Div.className = 'Target-item';
-                Div.innerHTML = `
-                    <input type="checkbox" class="Target-checkbox" ${target.completed ? 'checked' : ''} 
-                           onchange="ToggleTarget('${target.id}')">
-                    <span class="Target-text ${target.completed ? 'completed' : ''}">${target.title}</span>
-                    <button class="Target-delete" onclick="DeleteTarget('${target.id}')">Delete</button>
+                div.className = 'target-item';
+                div.innerHTML = `
+                    <input type="checkbox" class="target-checkbox" ${target.completed ? 'checked' : ''} 
+                           onchange="toggleTarget(${target.id})">
+                    <span class="target-text ${target.completed ? 'completed' : ''}">${target.title}</span>
+                    <button class="target-delete" onclick="deleteTarget(${target.id})">Delete</button>
                 `;
                 list.appendChild(div);
             });
         }
-        
-        Async Function AddTarget() {
+
+        async function addTarget() {
             const input = document.getElementById('newTargetInput');
             const title = input.value.trim();
             
-            If (!title) return;
+            if (!title) return;
             
-            CurrentUserData.Targets.push({
-                Id: Date.now().toString(),
-                Title: title,
-                completed: false,
-                createdAt: new Date().toISOString()
+            currentUserData.targets.push({
+                id: Date.now(),
+                title: title,
+                completed: false
             });
             
             input.value = '';
-            await SaveUserData();
-            RenderTargets();
-        }
-        
-        Async Function ToggleTarget(id) {
-            const target = CurrentUserData.Targets.find(t => t.id === id);
-            If (target) {
-                target.completed = !Target.completed;
-                await SaveUserData();
-                RenderTargets();
-            }
-        }
-        
-        Async Function DeleteTarget(id) {
-            CurrentUserData.Targets = CurrentUserData.Targets.filter(t => T.id !== id);
-            await SaveUserData();
-            RenderTargets();
+            await saveUserData();
+            renderTargets();
         }
 
-        // ==================== CALENDAR ====================
-        Function GenerateCalendar() {
+        async function toggleTarget(id) {
+            const target = currentUserData.targets.find(t => t.id === id);
+            if (target) {
+                target.completed = !target.completed;
+                await saveUserData();
+                renderTargets();
+            }
+        }
+
+        async function deleteTarget(id) {
+            currentUserData.targets = currentUserData.targets.filter(t => t.id !== id);
+            await saveUserData();
+            renderTargets();
+        }
+
+        // ==================== CALENDAR - FIXED ====================
+        function generateCalendar() {
             const grid = document.getElementById('calendarGrid');
             grid.innerHTML = '';
             
+            // Add day headers
             const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-            Days.forEach(day => {
-                const Div = document.createElement('div');
-                Div.className = 'calendar-day-header';
-                Div.textContent = day;
+            days.forEach(day => {
+                const div = document.createElement('div');
+                div.className = 'calendar-day-header';
+                div.textContent = day;
                 grid.appendChild(div);
             });
             
             const year = currentDate.getFullYear();
-            const Month = CurrentDate.getMonth();
+            const month = currentDate.getMonth();
             const firstDay = new Date(year, month, 1).getDay();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
             
-            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                              'July', 'August', 'September', 'October', 'November', 'December'];
             document.getElementById('calendarMonth').textContent = `${monthNames[month]} ${year}`;
             
-            // Empty slots
-            For (let i = 0; i < firstDay; i++) {
-                const Div = document.createElement('div');
-                Div.className = 'calendar-day';
+            // Empty slots for previous month
+            for (let i = 0; i < firstDay; i++) {
+                const div = document.createElement('div');
+                div.className = 'calendar-day';
                 grid.appendChild(div);
             }
             
-            // Days
-            For (let i = 1; i <= daysInMonth; i++) {
-                const Div = document.createElement('div');
-                Div.className = 'calendar-day';
+            // Days of the month
+            for (let i = 1; i <= daysInMonth; i++) {
+                const div = document.createElement('div');
+                div.className = 'calendar-day';
                 
                 const dateStr = new Date(year, month, i).toDateString();
-                const hasData = CurrentUserData.studyLog && CurrentUserData.studyLog[dateStr];
+                const hasData = currentUserData.studyLog && currentUserData.studyLog[dateStr];
                 
-                If (HasData) Div.classList.add('has-data');
-                
-                // Check if Selected Date
-                If (i === selectedDate.getDate() && month === selectedDate.getMonth() && year === selectedDate.getFullYear()) {
-                    Div.classList.add('active');
+                if (hasData) div.classList.add('has-data');
+                if (i === selectedDate.getDate() && month === selectedDate.getMonth() && 
+                    year === selectedDate.getFullYear()) {
+                    div.classList.add('active');
                 }
                 
-                Let html = `<div class="day-number">${i}</div>`;
-                
-                If (HasData) {
-                    const minutes = CurrentUserData.studyLog[dateStr].minutes;
-                    html += `<div class="day-info">${minutes}m studied</div>`;
+                let html = `<div class="day-number">${i}</div>`;
+                if (hasData) {
+                    const minutes = currentUserData.studyLog[dateStr].minutes;
+                    html += `<div class="day-info">${minutes}m</div>`;
                     html += `<div class="day-studied">✓</div>`;
                 }
+                div.innerHTML = html;
                 
-                Div.innerHTML = html;
-                Div.onclick = () => showDayDetails(new Date(year, month, i));
+                div.onclick = () => showDayDetails(new Date(year, month, i));
                 grid.appendChild(div);
             }
         }
-        
-        Function ChangeMonth(delta) {
-            CurrentDate.setMonth(CurrentDate.getMonth() + delta);
-            GenerateCalendar();
+
+        function changeMonth(delta) {
+            currentDate.setMonth(currentDate.getMonth() + delta);
+            generateCalendar();
         }
-        
-        Function ShowDayDetails(date) {
+
+        function showDayDetails(date) {
             const dateStr = date.toDateString();
-            const data = CurrentUserData.studyLog && CurrentUserData.studyLog[dateStr];
+            const data = currentUserData.studyLog && currentUserData.studyLog[dateStr];
             
             document.getElementById('dayModalTitle').textContent = date.toDateString();
             
             const content = document.getElementById('dayModalContent');
-            
-            If (!data) {
+            if (!data) {
                 content.innerHTML = '<p style="color: var(--text-muted);">No study data for this day.</p>';
             } else {
-                const completedTargets = CurrentUserData.Targets ? CurrentUserData.Targets.filter(t => t.completed).length : 0;
-                const totalTargets = CurrentUserData.Targets ? CurrentUserData.Targets.length : 0;
+                const completedTargets = currentUserData.targets.filter(t => t.completed).length;
+                const totalTargets = currentUserData.targets.length;
                 
                 content.innerHTML = `
-                    <div class="Detail-item">
-                        <div class="Detail-label">Total Study Time</div>
-                        <div class="Detail-value">${data.minutes} minutes</div>
+                    <div class="detail-item">
+                        <div class="detail-label">Total Study Time</div>
+                        <div class="detail-value">${data.minutes} minutes</div>
                     </div>
-                    <div class="Detail-item">
-                        <div class="Detail-label">Sessions</div>
-                        <div class="Detail-value">${data.sessions}</div>
+                    <div class="detail-item">
+                        <div class="detail-label">Sessions</div>
+                        <div class="detail-value">${data.sessions}</div>
                     </div>
-                    <div class="Detail-item">
-                        <div class="Detail-label">Subjects Studied</div>
-                        <div class="Detail-value">${data.subjects ? data.subjects.join(', ') : 'None'}</div>
+                    <div class="detail-item">
+                        <div class="detail-label">Subjects Studied</div>
+                        <div class="detail-value">${data.subjects ? data.subjects.join(', ') : 'None'}</div>
                     </div>
-                    <div class="Detail-item">
-                        <div class="Detail-label">Targets Completed</div>
-                        <div class="Detail-value">${completedTargets} / ${TotalTargets}</div>
+                    <div class="detail-item">
+                        <div class="detail-label">Targets Achieved</div>
+                        <div class="detail-value">${completedTargets} / ${totalTargets}</div>
                     </div>
                 `;
             }
             
             document.getElementById('dayModal').classList.add('active');
         }
-        
-        Function CloseDayModal(event) {
-            If (!event || event.target.id === 'dayModal' || event.target.classList.contains('modal-close')) {
+
+        function closeDayModal(event) {
+            if (!event || event.target.id === 'dayModal' || event.target.classList.contains('modal-close')) {
                 document.getElementById('dayModal').classList.remove('active');
             }
         }
 
         // ==================== MARKS ====================
-        Function RenderMarksCategories() {
-            const list = document.getElementById('MarksCategories');
+        function renderMarksCategories() {
+            const list = document.getElementById('marksCategories');
             let html = `
                 <div class="category-item ${currentCategory === 'all' ? 'active' : ''}" onclick="selectCategory('all')">
                     <span>All Marks</span>
-                    <span id="CountAll">${GetTotalMarksCount()}</span>
-                                </div>
+                    <span>${getTotalMarksCount()}</span>
+                </div>
             `;
             
-            Object.keys(CurrentUserData.marks || {}).forEach(cat => {
+            Object.keys(currentUserData.marks || {}).forEach(cat => {
                 html += `
                     <div class="category-item ${currentCategory === cat ? 'active' : ''}" onclick="selectCategory('${cat}')">
                         <span>${cat}</span>
-                        <span>${(CurrentUserData.marks[cat] || []).length}</span>
+                        <span>${(currentUserData.marks[cat] || []).length}</span>
                     </div>
                 `;
             });
             
             list.innerHTML = html;
             
-            // Update analytics dropdown
             const analyticsSelect = document.getElementById('analyticsCategory');
-            Let options = '<option value="all">Overall (All Categories)</option>';
-            Object.keys(CurrentUserData.marks || {}).ForEach(cat => {
+            let options = '<option value="all">Overall (All Categories)</option>';
+            Object.keys(currentUserData.marks || {}).forEach(cat => {
                 options += `<option value="${cat}">${cat}</option>`;
             });
-            AnalyticsSelect.innerHTML = options;
+            analyticsSelect.innerHTML = options;
         }
-        
-        Function GetTotalMarksCount() {
-            If (!CurrentUserData || !CurrentUserData.marks) return 0;
-            Let count = 0;
-            Object.values(CurrentUserData.marks).ForEach(arr => Count += arr.length);
-            Return count;
+
+        function getTotalMarksCount() {
+            if (!currentUserData || !currentUserData.marks) return 0;
+            let count = 0;
+            Object.values(currentUserData.marks).forEach(arr => count += arr.length);
+            return count;
         }
-        
-        Function SelectCategory(category) {
-            CurrentCategory = category;
-            RenderMarksCategories();
-            RenderMarks();
+
+        function selectCategory(category) {
+            currentCategory = category;
+            renderMarksCategories();
+            renderMarks();
         }
-        
-        Async Function RenderMarks() {
+
+        function renderMarks() {
             const title = document.getElementById('currentCategoryTitle');
-            const tbody = document.getElementById('MarksTableBody');
+            const tbody = document.getElementById('marksTableBody');
             
-            Let marks = [];
-            If (CurrentCategory === 'all') {
-                Object.values(CurrentUserData.marks || {}).ForEach(arr => Marks.push(...arr));
-                Title.textContent = 'All Marks';
+            let marks = [];
+            if (currentCategory === 'all') {
+                Object.values(currentUserData.marks || {}).forEach(arr => marks.push(...arr));
+                title.textContent = 'All Marks';
             } else {
-                Marks = (CurrentUserData.marks && CurrentUserData.marks[CurrentCategory]) || [];
-                Title.textContent = CurrentCategory;
+                marks = (currentUserData.marks && currentUserData.marks[currentCategory]) || [];
+                title.textContent = currentCategory;
             }
             
-            If (Marks.length === 0) {
-                Tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">No marks added yet. Click "+ Add Paper" to start tracking.</td></tr>';
+            if (marks.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">No marks added yet</td></tr>';
                 return;
             }
             
-            // Sort by date (newest first)
-            Marks.sort((a, b) => new Date(b.date) - new Date(a.date));
-            
-            Tbody.innerHTML = Marks.map((mark, idx) => `
+            tbody.innerHTML = marks.map((mark, idx) => `
                 <tr>
-                    <td>${Mark.paperNo}</td>
-                    <td>${Mark.subject}</td>
-                    <td style="color: ${getMarkColor(Mark.score)}; font-weight: 700;">${Mark.score}%</td>
-                    <td>${Mark.Date}</td>
+                    <td>${mark.paperNo}</td>
+                    <td>${mark.subject}</td>
+                    <td style="color: ${mark.score >= 75 ? 'var(--accent)' : mark.score >= 50 ? 'var(--warning)' : 'var(--danger)'}; font-weight: 700;">${mark.score}%</td>
+                    <td>${mark.date}</td>
                     <td>
-                        <button class="Target-delete" onclick="DeleteMark('${Mark.category}', ${idx})">Delete</button>
+                        <button class="target-delete" onclick="deleteMark('${mark.category}', ${idx})">Delete</button>
                     </td>
-                `).join('');
+                </tr>
+            `).join('');
         }
-        
-        Function GetMarkColor(score) {
-            If (score >= 80) return 'var(--success)';
-            If (score >= 60) return 'var(--warning)';
-            Return 'var(--danger)';
-        }
-        
-        Async Function AddCategory() {
+
+        async function addCategory() {
             const name = document.getElementById('newCategoryName').value.trim();
-            If (!name) return;
+            if (!name) return;
             
-            If (!CurrentUserData.marks[name]) {
-                CurrentUserData.marks[name] = [];
+            if (!currentUserData.marks[name]) {
+                currentUserData.marks[name] = [];
             }
             
-            await SaveUserData();
-            RenderMarksCategories();
-            document.getElementById('NewCategoryName').value = '';
+            await saveUserData();
+            renderMarksCategories();
+            document.getElementById('newCategoryName').value = '';
         }
-        
-        Function OpenAddMarkModal() {
-            const categorySelect = document.getElementById('MarkCategory');
-            Let options = '';
-            Object.keys(CurrentUserData.marks || {}).ForEach(cat => {
+
+        function openAddMarkModal() {
+            const categorySelect = document.getElementById('markCategory');
+            let options = '';
+            Object.keys(currentUserData.marks || {}).forEach(cat => {
                 options += `<option value="${cat}">${cat}</option>`;
             });
-            CategorySelect.innerHTML = options;
-            document.getElementById('AddMarkModal').classList.add('active');
+            categorySelect.innerHTML = options;
+            document.getElementById('addMarkModal').classList.add('active');
         }
-        
-        Function CloseMarkModal(event) {
-            If (!event || event.target.id === 'addMarkModal' || event.target.classList.contains('modal-close')) {
-                document.getElementById('AddMarkModal').classList.remove('active');
+
+        function closeMarkModal(event) {
+            if (!event || event.target.id === 'addMarkModal' || event.target.classList.contains('modal-close')) {
+                document.getElementById('addMarkModal').classList.remove('active');
             }
         }
-        
-        Async Function SaveMark() {
-            const category = document.getElementById('MarkCategory').value;
-            const paperNo = document.getElementById('MarkPaperNo').value.trim();
-            const subject = document.getElementById('MarkSubject').value;
-            const score = parseFloat(document.getElementById('MarkScore').value);
-            const Date = document.getElementById('MarkDate').value;
+
+        async function saveMark() {
+            const category = document.getElementById('markCategory').value;
+            const paperNo = document.getElementById('markPaperNo').value.trim();
+            const subject = document.getElementById('markSubject').value;
+            const score = parseFloat(document.getElementById('markScore').value);
+            const date = document.getElementById('markDate').value;
             
-            If (!category || !paperNo || !subject || isNaN(score) || !date) {
+            if (!category || !paperNo || !subject || isNaN(score) || !date) {
                 alert('Please fill in all fields!');
                 return;
             }
             
-            If (score < 0 || score > 100) {
+            if (score < 0 || score > 100) {
                 alert('Score must be between 0 and 100!');
                 return;
             }
             
-            If (!CurrentUserData.marks[category]) {
-                CurrentUserData.marks[category] = [];
+            if (!currentUserData.marks[category]) {
+                currentUserData.marks[category] = [];
             }
             
-            CurrentUserData.marks[category].push({
+            currentUserData.marks[category].push({
                 paperNo, subject, score, date, category
             });
             
-            await SaveUserData();
-            CloseMarkModal();
-            RenderMarksCategories();
-            RenderMarks();
+            await saveUserData();
+            closeMarkModal();
+            renderMarksCategories();
+            renderMarks();
             
-            // Clear Form
-            document.getElementById('MarkPaperNo').value = '';
-            document.getElementById('MarkScore').value = '';
+            document.getElementById('markPaperNo').value = '';
+            document.getElementById('markScore').value = '';
         }
-        
-        Async Function DeleteMark(category, index) {
-            If (!confirm('Are you sure you want to delete this mark?')) return;
+
+        async function deleteMark(category, index) {
+            if (!confirm('Are you sure you want to delete this mark?')) return;
             
-            CurrentUserData.marks[category].splice(index, 1);
-            If (CurrentUserData.marks[category].length === 0) {
-                Delete CurrentUserData.marks[category];
+            currentUserData.marks[category].splice(index, 1);
+            if (currentUserData.marks[category].length === 0) {
+                delete currentUserData.marks[category];
             }
             
-            await SaveUserData();
-            RenderMarksCategories();
-            RenderMarks();
+            await saveUserData();
+            renderMarksCategories();
+            renderMarks();
         }
 
         // ==================== ANALYTICS ====================
-        Function InitAnalytics() {
-            // Populate study subject filter
-            const studyFilter = document.getElementById('analyticsSubject');
-            If (studyFilter && CurrentUserData && CurrentUserData.Subjects) {
-                const options = CurrentUserData.Subjects.map(s => 
+        function initAnalytics() {
+            const studyFilter = document.getElementById('studySubjectFilter');
+            if (studyFilter && currentUserData && currentUserData.subjects) {
+                const options = currentUserData.subjects.map(s => 
                     `<option value="${s.name}">${s.name}</option>`
                 ).join('');
                 studyFilter.innerHTML = '<option value="all">Overall (All Subjects)</option>' + options;
             }
             
-            SelectAnalyticsType('marks');
+            selectAnalyticsType('marks');
         }
-        
-        Function SelectAnalyticsType(type) {
-            CurrentAnalyticsType = type;
+
+        function selectAnalyticsType(type) {
+            currentAnalyticsType = type;
             
-            document.querySelectorAll('.analytics-item').ForEach(item => {
-                Item.classList.remove('active');
+            document.querySelectorAll('.analytics-item').forEach(item => {
+                item.classList.remove('active');
             });
             
-            If (event && event.currentTarget) {
-                Event.currentTarget.classList.add('active');
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.add('active');
             }
             
-            const marksAnalytics = document.getElementById('MarksAnalytics');
-            const studyAnalytics = document.getElementById('StudyAnalytics');
+            const marksAnalytics = document.getElementById('marksAnalytics');
+            const studyAnalytics = document.getElementById('studyAnalytics');
             
-            If (type === 'marks') {
-                MarksAnalytics.classList.remove('hidden');
-                StudyAnalytics.classList.add('hidden');
-                UpdateMarksChart();
+            if (type === 'marks') {
+                marksAnalytics.classList.remove('hidden');
+                studyAnalytics.classList.add('hidden');
+                updateMarksChart();
             } else {
-                MarksAnalytics.classList.add('hidden');
-                StudyAnalytics.classList.remove('hidden');
-                UpdateStudyChart();
+                marksAnalytics.classList.add('hidden');
+                studyAnalytics.classList.remove('hidden');
+                updateStudyChart();
             }
         }
-        
-        Function UpdateMarksChart() {
+
+        function updateMarksChart() {
             const category = document.getElementById('analyticsCategory').value;
-            Let marks = [];
+            let marks = [];
             
-            If (category === 'all') {
-                Object.values(CurrentUserData.marks || {}).ForEach(arr => Marks.push(...arr));
+            if (category === 'all') {
+                Object.values(currentUserData.marks || {}).forEach(arr => marks.push(...arr));
             } else {
-                Marks = (CurrentUserData.marks && CurrentUserData.marks[category]) || [];
+                marks = (currentUserData.marks && currentUserData.marks[category]) || [];
             }
             
-            // Sort by date
-            Marks.sort((a, b) => new Date(a.date) - new Date(b.date));
+            marks.sort((a, b) => new Date(a.date) - new Date(b.date));
             
-            const ctx = document.getElementById('MarksChart');
+            const ctx = document.getElementById('marksChart');
             
-            If (marksChartInstance) {
-                MarksChartInstance.destroy();
+            if (marksChartInstance) {
+                marksChartInstance.destroy();
             }
             
-            If (Marks.length === 0) {
-                // Show empty state
-                Return;
-            }
+            if (marks.length === 0) return;
             
             marksChartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: Marks.map(m => `${m.subject} ${M.paperNo}`),
+                    labels: marks.map(m => `${m.subject} ${m.paperNo}`),
                     datasets: [{
                         label: 'Marks (%)',
-                        data: Marks.map(m => m.score),
+                        data: marks.map(m => m.score),
                         borderColor: '#00d4ff',
                         backgroundColor: 'rgba(0, 212, 255, 0.1)',
                         borderWidth: 3,
@@ -1651,8 +1678,7 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            display: true,
-                            labels: { color: '#fff', font: { family: 'Rajdhani', size: 14 } }
+                            labels: { color: '#fff', font: { family: 'Rajdhani' } }
                         }
                     },
                     scales: {
@@ -1670,74 +1696,72 @@
                 }
             });
         }
-        
-        Function SetTimeFilter(filter) {
-            CurrentTimeFilter = filter;
-            document.querySelectorAll('.filter-btn').ForEach(b => B.classList.remove('active'));
+
+        function setTimeFilter(filter) {
+            currentTimeFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             
-            If (Event && Event.currentTarget) {
-                Event.currentTarget.classList.add('active');
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.add('active');
             }
             
-            UpdateStudyChart();
+            updateStudyChart();
         }
-        
-        Function UpdateStudyChart() {
-            const selectedSubject = document.getElementById('analyticsSubject').value;
+
+        function updateStudyChart() {
+            const selectedSubject = document.getElementById('studySubjectFilter').value;
             const now = new Date();
-            Let days = 7;
+            let days = 7;
             
-            Switch(CurrentTimeFilter) {
-                Case 'week': days = 7; break;
-                Case 'month': days = 30; break;
-                Case '3months': days = 90; break;
-                Case 'year': days = 365; break;
-                Default: days = 3650;
+            switch(currentTimeFilter) {
+                case 'week': days = 7; break;
+                case 'month': days = 30; break;
+                case '3months': days = 90; break;
+                case 'year': days = 365; break;
+                default: days = 3650;
             }
             
             const labels = [];
             const data = [];
-            Let totalSessions = 0;
-            Let totalMinutes = 0;
-            Let daysWithData = 0;
+            let totalSessions = 0;
+            let totalMinutes = 0;
+            let daysWithData = 0;
             
-            For (let i = days - 1; i >= 0; i--) {
+            for (let i = days - 1; i >= 0; i--) {
                 const d = new Date();
                 d.setDate(now.getDate() - i);
                 const dateStr = d.toDateString();
-                const log = CurrentUserData && CurrentUserData.studyLog[dateStr];
+                const log = currentUserData && currentUserData.studyLog[dateStr];
                 
-                Let minutes = 0;
+                let minutes = 0;
                 
-                If (log) {
-                    If (selectedSubject === 'all') {
-                        Minutes = log.minutes;
-                        TotalSessions += log.sessions;
-                    } else If (log.Subjects && log.Subjects.includes(selectedSubject)) {
-                        // Estimate based on subject presence
-                        Minutes = Math.floor(log.minutes / log.Subjects.length);
-                        TotalSessions += 1;
+                if (log) {
+                    if (selectedSubject === 'all') {
+                        minutes = log.minutes;
+                        totalSessions += log.sessions;
+                    } else if (log.subjects && log.subjects.includes(selectedSubject)) {
+                        minutes = Math.floor(log.minutes / log.subjects.length);
+                        totalSessions += 1;
                     }
-                    TotalMinutes += Minutes;
-                    DaysWithData++;
+                    totalMinutes += minutes;
+                    daysWithData++;
                 }
                 
-                // Only add to chart if has data
-                If (log || i < 30) {
-                    Labels.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-                    Data.push(minutes);
+                if (log || i < 30) {
+                    labels.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+                    data.push(minutes);
                 }
             }
             
-            // Update Stats
-            document.getElementById('totalStudySessions').textContent = TotalSessions;
-            document.getElementById('totalStudyMinutes').textContent = TotalMinutes;
-            document.getElementById('AvgStudyTime').textContent = DaysWithData > 0 ? Math.round(TotalMinutes / DaysWithData) : 0;
+            document.getElementById('totalStudySessions').textContent = totalSessions;
+            document.getElementById('totalStudyMinutes').textContent = totalMinutes;
+            document.getElementById('avgStudyTime').textContent = daysWithData > 0 ? 
+                Math.round(totalMinutes / daysWithData) : 0;
             
-            const ctx = document.getElementById('StudyChart');
+            const ctx = document.getElementById('studyChart');
             
-            If (studyChartInstance) {
-                StudyChartInstance.destroy();
+            if (studyChartInstance) {
+                studyChartInstance.destroy();
             }
             
             const colors = {
@@ -1747,7 +1771,7 @@
             
             const color = selectedSubject === 'all' ? colors.all : colors.default;
             
-            StudyChartInstance = new Chart(ctx, {
+            studyChartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labels,
@@ -1770,7 +1794,6 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            display: true,
                             labels: { color: '#fff', font: { family: 'Rajdhani' } }
                         }
                     },
@@ -1792,89 +1815,31 @@
                 }
             });
         }
-        
-        // ==================== STREAK ====================
-        Function UpdateStreak() {
-            If (!CurrentUserData) return;
-            
-            const today = new Date().toDateString();
-            const yesterday = new Date();
-            yesterday.setDate(yesterday.getDate() - 1);
-            const yesterdayStr = yesterday.toDateString();
-            
-            If (CurrentUserData.lastStudyDate === yesterdayStr) {
-                CurrentUserData.currentStreak++;
-            } else If (CurrentUserData.lastStudyDate !== today) {
-                CurrentUserData.currentStreak = 1;
-            }
-            
-            CurrentUserData.lastStudyDate = today;
-        }
-        
+
         // ==================== UI HELPERS ====================
-        Function showLoading(show) {
+        function showLoading(show) {
             document.getElementById('loadingOverlay').classList.toggle('active', show);
         }
-        
-        Function showSyncStatus(status) {
+
+        function showSyncStatus(status) {
             const el = document.getElementById('syncStatus');
             el.className = 'sync-status show';
             
-            If (status === 'syncing') {
-                El.textContent = 'Syncing...';
-                El.classList.add('syncing');
-            } else If (status === 'synced') {
-                El.textContent = '✓ Saved';
-                El.classList.remove('syncing');
-                El.classList.add('synced');
-                SetTimeout(() => el.classList.remove('show'), 2000);
-            } Else If (status === 'error') {
-                El.textContent = '✗ Error';
-                El.classList.remove('syncing');
-                El.classList.add('synced');
+            if (status === 'syncing') {
+                el.textContent = 'Syncing...';
+                el.classList.add('syncing');
+            } else if (status === 'synced') {
+                el.textContent = '✓ Saved';
+                el.classList.remove('syncing');
+                el.classList.add('synced');
+            } else if (status === 'error') {
+                el.textContent = '✗ Error';
+                el.classList.remove('syncing');
             }
         }
-        
-        Function HideSyncStatus() {
+
+        function hideSyncStatus() {
             document.getElementById('syncStatus').classList.remove('show');
-        }
-        
-        // ==================== PROFILE MODAL ====================
-        Function OpenProfile() {
-            If (!CurrentUserData) return;
-            
-            document.getElementById('modalAvatar').src = CurrentUserData.profile.photo;
-            document.getElementById('modalName').textContent = CurrentUserData.profile.name;
-            document.getElementById('ModalStream').textContent = CurrentUserData.profile.stream;
-            document.getElementById('ModalEmail').textContent = CurrentUserData.profile.email || 'Not set';
-            
-            const hours = Math.floor((CurrentUserData.totalStudyTime || 0) / 60);
-            const mins = (CurrentUserData.totalStudyTime || 0) % 60;
-            document.getElementById('ModalStudyTime').textContent = `${hours}h ${mins}m`;
-            document.getElementById('ModalStreak').textContent = `${CurrentUserData.currentStreak || 0} days`;
-            
-            document.getElementById('profileModal').classList.add('active');
-        }
-        
-        Function CloseProfile(event) {
-            If (!event || event.target.id === 'profileModal' || event.target.classList.contains('modal-close')) {
-                document.getElementById('profileModal').classList.remove('active');
-            }
-        }
-        
-        // ==================== HOME STATS ====================
-        Function UpdateHomeStats() {
-            If (!CurrentUserData) return;
-            
-            const today = new Date().toDateString();
-            const todayData = CurrentUserData.studyLog && CurrentUserData.studyLog[today];
-            const completedTargets = CurrentUserData.Targets ? CurrentUserData.Targets.filter(t => T.completed).length : 0;
-            const totalTargets = CurrentUserData.Targets ? CurrentUserData.Targets.length : 0;
-            
-            const pendingText = completedTargets < TotalTargets ? 
-                `${TotalTargets - CompletedTargets} pending` : 'All Targets Completed!';
-            
-            document.getElementById('homeTargetsCount').textContent = pendingText;
         }
     </script>
 </body>
