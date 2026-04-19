@@ -1333,17 +1333,17 @@
             
             <div class="analytics-container">
                 <div class="analytics-sidebar">
-                    <div class="analytics-menu">
-                        <div class="analytics-item active" onclick="selectAnalyticsType('marks')">
-                            <div style="font-weight: 600;">📈 Marks Analysis</div>
-                            <div style="font-size: 0.85rem; color: var(--text-muted);">Track academic progress</div>
-                        </div>
-                        <div class="analytics-item" onclick="selectAnalyticsType('study')">
-                            <div style="font-weight: 600;">⏱️ Study Time Analysis</div>
-                            <div style="font-size: 0.85rem; color: var(--text-muted);">Visualize study habits</div>
-                        </div>
-                    </div>
-                </div>
+    <div class="analytics-menu">
+        <div class="analytics-item active" onclick="selectAnalyticsType('marks')">
+            <div style="font-weight: 600;">📈 Marks Analysis</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">Track academic progress</div>
+        </div>
+        <div class="analytics-item" onclick="selectAnalyticsType('study')">
+            <div style="font-weight: 600;">⏱️ Study Time Analysis</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">Visualize study habits</div>
+        </div>
+    </div>
+</div>
                 
                 <div class="analytics-main">
                     <!-- Marks Analytics -->
@@ -1360,16 +1360,40 @@
                     </div>
                     
                     <!-- Study Time Analytics -->
-                    <div id="studyAnalytics" class="hidden">
-                        <div class="time-filter">
-                            <button class="filter-btn active" onclick="setTimeFilter('week')">Last Week</button>
-                            <button class="filter-btn" onclick="setTimeFilter('month')">Last Month</button>
-                            <button class="filter-btn" onclick="setTimeFilter('3months')">Last 3 Months</button>
-                            <button class="filter-btn" onclick="setTimeFilter('year')">Last Year</button>
-                            <button class="filter-btn" onclick="setTimeFilter('all')">Overall</button>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="studyChart"></canvas>
+                    <!-- Study Time Analytics -->
+<div id="studyAnalytics" class="hidden">
+    <div style="margin-bottom: 20px;">
+        <label style="color: var(--primary); display: block; margin-bottom: 10px;">Select Subject</label>
+        <select id="studySubjectFilter" class="subject-dropdown" onchange="updateStudyChart()">
+            <option value="all">Overall (All Subjects)</option>
+        </select>
+    </div>
+    
+    <div class="time-filter">
+        <button class="filter-btn active" onclick="setTimeFilter('week')">Last Week</button>
+        <button class="filter-btn" onclick="setTimeFilter('month')">Last Month</button>
+        <button class="filter-btn" onclick="setTimeFilter('3months')">Last 3 Months</button>
+        <button class="filter-btn" onclick="setTimeFilter('year')">Last Year</button>
+        <button class="filter-btn" onclick="setTimeFilter('all')">All Time</button>
+    </div>
+    
+    <div class="chart-container">
+        <canvas id="studyChart"></canvas>
+    </div>
+    
+    <div id="studyStats" style="margin-top: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+        <div class="stat-card">
+            <div class="stat-value" id="totalStudySessions">0</div>
+            <div class="stat-label">Total Sessions</div>
+        </div>
+        <div class="stat-card">
+                <div class="stat-value" id="totalStudyMinutes">0</div>
+                <div class="stat-label">Total Minutes</div>
+                </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="avgStudyTime">0</div>
+                            <div class="stat-label">Avg Per Day</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1732,18 +1756,24 @@
 }
 
         function populateSubjectDropdowns() {
-            const timerSelect = document.getElementById('timerSubject');
-            const stopwatchSelect = document.getElementById('stopwatchSubject');
-            const markSelect = document.getElementById('markSubject');
-            
-            const options = currentUserData.subjects.map(s => 
-                `<option value="${s.name}">${s.name}</option>`
-            ).join('');
-            
-            timerSelect.innerHTML = '<option value="">Choose a subject...</option>' + options;
-            stopwatchSelect.innerHTML = '<option value="">Choose a subject...</option>' + options;
-            markSelect.innerHTML = options;
-        }
+    const timerSelect = document.getElementById('timerSubject');
+    const stopwatchSelect = document.getElementById('stopwatchSubject');
+    const markSelect = document.getElementById('markSubject');
+    const studyFilter = document.getElementById('studySubjectFilter');
+    
+    const options = currentUserData.subjects.map(s => 
+        `<option value="${s.name}">${s.name}</option>`
+    ).join('');
+    
+    timerSelect.innerHTML = '<option value="">Choose a subject...</option>' + options;
+    stopwatchSelect.innerHTML = '<option value="">Choose a subject...</option>' + options;
+    markSelect.innerHTML = options;
+    
+    // Populate study analytics filter
+    if (studyFilter) {
+        studyFilter.innerHTML = '<option value="all">Overall (All Subjects)</option>' + options;
+    }
+}
 
         function updateHomeStats() {
             const today = new Date().toDateString();
@@ -2270,8 +2300,17 @@
 
         // ==================== ANALYTICS ====================
         function initAnalytics() {
-            selectAnalyticsType('marks');
-        }
+    // Populate study subject filter
+    const studyFilter = document.getElementById('studySubjectFilter');
+    if (studyFilter && currentUserData.subjects) {
+        const options = currentUserData.subjects.map(s => 
+            `<option value="${s.name}">${s.name}</option>`
+        ).join('');
+        studyFilter.innerHTML = '<option value="all">Overall (All Subjects)</option>' + options;
+    }
+    
+    selectAnalyticsType('marks');
+}
 
         function selectAnalyticsType(type) {
             currentAnalyticsType = type;
@@ -2366,80 +2405,118 @@
         }
 
         function updateStudyChart() {
-            const now = new Date();
-            let days = 7;
-            
-            if (currentTimeFilter === 'week') days = 7;
-            else if (currentTimeFilter === 'month') days = 30;
-            else if (currentTimeFilter === '3months') days = 90;
-            else if (currentTimeFilter === 'year') days = 365;
-            else days = 3650; // all time
-            
-            const labels = [];
-            const data = [];
-            
-            for (let i = days - 1; i >= 0; i--) {
-                const d = new Date();
-                d.setDate(d.getDate() - i);
-                const dateStr = d.toDateString();
-                const log = currentUserData.studyLog[dateStr];
-                
-                if (log || days <= 30) { // Only show days with data for long periods
-                    labels.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-                    data.push(log ? log.minutes : 0);
+    const selectedSubject = document.getElementById('studySubjectFilter').value;
+    const now = new Date();
+    let days = 7;
+    
+    if (currentTimeFilter === 'week') days = 7;
+    else if (currentTimeFilter === 'month') days = 30;
+    else if (currentTimeFilter === '3months') days = 90;
+    else if (currentTimeFilter === 'year') days = 365;
+    else days = 3650; // all time
+    
+    const labels = [];
+    const data = [];
+    let totalSessions = 0;
+    let totalMinutes = 0;
+    let daysWithData = 0;
+    
+    for (let i = days - 1; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toDateString();
+        const log = currentUserData.studyLog[dateStr];
+        
+        let minutes = 0;
+        
+        if (log) {
+            if (selectedSubject === 'all') {
+                // All subjects
+                minutes = log.minutes;
+                totalSessions += log.sessions;
+            } else {
+                // Specific subject - estimate based on subject presence
+                if (log.subjects && log.subjects.includes(selectedSubject)) {
+                    // Divide time equally among subjects studied that day
+                    minutes = Math.floor(log.minutes / log.subjects.length);
+                    totalSessions += 1;
                 }
             }
-            
-            const ctx = document.getElementById('studyChart').getContext('2d');
-            
-            if (studyChartInstance) {
-                studyChartInstance.destroy();
-            }
-            
-            studyChartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Study Time (minutes)',
-                        data: data,
-                        borderColor: '#00ff88',
-                        backgroundColor: 'rgba(0, 255, 136, 0.1)',
-                        borderWidth: 3,
-                        tension: 0.4,
-                        fill: true,
-                        pointBackgroundColor: '#00ff88',
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2,
-                        pointRadius: 4
-                    }]
+            totalMinutes += minutes;
+            daysWithData++;
+        }
+        
+        // Only add to chart if has data or within reasonable range
+        if (log || days <= 30) {
+            labels.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+            data.push(minutes);
+        }
+    }
+    
+    // Update stats
+    document.getElementById('totalStudySessions').textContent = totalSessions;
+    document.getElementById('totalStudyMinutes').textContent = totalMinutes;
+    document.getElementById('avgStudyTime').textContent = daysWithData > 0 ? 
+        Math.round(totalMinutes / daysWithData) : 0;
+    
+    const ctx = document.getElementById('studyChart').getContext('2d');
+    
+    if (studyChartInstance) {
+        studyChartInstance.destroy();
+    }
+    
+    // Different color for different subjects
+    const colors = {
+        'all': { border: '#00ff88', bg: 'rgba(0, 255, 136, 0.1)' },
+        'default': { border: '#00d4ff', bg: 'rgba(0, 212, 255, 0.1)' }
+    };
+    
+    const color = selectedSubject === 'all' ? colors.all : colors.default;
+    
+    studyChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: selectedSubject === 'all' ? 'All Subjects (minutes)' : `${selectedSubject} (minutes)`,
+                data: data,
+                borderColor: color.border,
+                backgroundColor: color.bg,
+                borderWidth: 3,
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: color.border,
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: { color: '#fff', font: { family: 'Rajdhani' } }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                    ticks: { color: '#888', font: { family: 'Rajdhani' } }
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            labels: { color: '#fff', font: { family: 'Rajdhani' } }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                            ticks: { color: '#888', font: { family: 'Rajdhani' } }
-                        },
-                        x: {
-                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                            ticks: { 
-                                color: '#888', 
-                                font: { family: 'Rajdhani' },
-                                maxTicksLimit: 10
-                            }
-                        }
+                x: {
+                    grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                    ticks: { 
+                        color: '#888', 
+                        font: { family: 'Rajdhani' },
+                        maxTicksLimit: 10
                     }
                 }
-            });
+            }
         }
+    });
+}
 
         // ==================== DATA PERSISTENCE ====================
         function saveUserData() {
